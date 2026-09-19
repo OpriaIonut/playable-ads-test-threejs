@@ -71,6 +71,16 @@ export class Game
         return this.texLoader;
     }
 
+    public get cameraObject(): PerspectiveCamera
+    {
+        return this.camera;
+    }
+
+    public get canvasElement(): HTMLCanvasElement
+    {
+        return this.renderer.domElement;
+    }
+
     public setCameraPos(pos: Vector3)
     {
         this.camera.position.copy(pos);

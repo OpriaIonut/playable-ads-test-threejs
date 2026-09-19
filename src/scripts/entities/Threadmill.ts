@@ -3,40 +3,46 @@ import { game } from "../../main";
 
 export class Threadmill
 {
+    private curve: CatmullRomCurve3;
+    private curvePoints = [
+        //Bottom lane
+        new Vector3(-1, 0, 0.5),
+        new Vector3(1.0, 0, 0.5),
+        new Vector3(1.3, 0, 0.35),
+
+        //Right lane
+        new Vector3(1.4, 0, 0),
+        new Vector3(1.4, 0, -2),
+        new Vector3(1.3, 0, -2.35),
+
+        //Top lane
+        new Vector3(1, 0, -2.5),
+        new Vector3(-1, 0, -2.5),
+        new Vector3(-1.3, 0, -2.35),
+
+        //Left lane
+        new Vector3(-1.4, 0, -2),
+        new Vector3(-1.4, 0, 0)
+    ];
+
     constructor()
     {
-        let positions = [
-            //Bottom lane
-            new Vector3(-1, 0, 0.5),
-            new Vector3(1.0, 0, 0.5),
-            new Vector3(1.3, 0, 0.35),
-
-            //Right lane
-            new Vector3(1.4, 0, 0),
-            new Vector3(1.4, 0, -2),
-            new Vector3(1.3, 0, -2.35),
-            
-            //Top lane
-            new Vector3(1, 0, -2.5),
-            new Vector3(-1, 0, -2.5),
-            new Vector3(-1.3, 0, -2.35),
-
-            //Left lane
-            new Vector3(-1.4, 0, -2),
-            new Vector3(-1.4, 0, 0)
-        ];
-        const curve = new CatmullRomCurve3(positions, false, 'centripetal', 1.0);
-        const points = curve.getPoints( 50 );
+        this.curve = new CatmullRomCurve3(this.curvePoints, false, 'centripetal', 1.0);
+        const points = this.curve.getPoints( 50 );
         const geometry = new BufferGeometry().setFromPoints( points );
         const material = new LineBasicMaterial( { color: 0x00ffff } );
+        const curveObject = new Line( geometry, material );
+        game.addObject(curveObject);
         
         // for(let index = 0; index < positions.length; ++index)
         // {
         //     this.spawnDebugSpheres(positions[index])
         // }
+    }
 
-        const curveObject = new Line( geometry, material );
-        game.addObject(curveObject);
+    public getPathPoints(numPoints: number)
+    {
+        return this.curve.getPoints(numPoints);
     }
 
     private spawnDebugSpheres(pos: Vector3)
