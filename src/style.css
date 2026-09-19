@@ -13,3 +13,16 @@ body,
 #mainCanvas {
     display: block;
 }
+
+.counter {
+    position: absolute;
+    font-size: 3vh;
+    transform: translateX(-75%) translateY(-50%);
+    pointer-events: none;
+    color: white;
+    text-shadow:
+        -0.125vh -0.125vh 0 black,
+         0.125vh -0.125vh 0 black,
+        -0.125vh  0.125vh 0 black,
+         0.125vh  0.125vh 0 black;
+}

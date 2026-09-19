@@ -1,4 +1,4 @@
-import { Color, Mesh, MeshStandardMaterial, SphereGeometry, Vector3, type Object3D } from "three";
+import { Color, Material, Mesh, MeshStandardMaterial, SphereGeometry, Vector3, type Object3D } from "three";
 import type { Updatable } from "../../interfaces";
 import { RoundedBoxGeometry } from "three/examples/jsm/Addons.js";
 import { game } from "../../main";
@@ -7,7 +7,7 @@ import { Bullet } from "./Bullet";
 
 export class Turret implements Updatable
 {
-    private obj: Object3D;
+    private obj: Mesh;
     private tileManager: TileManager;
     private bullets: number;
     private color: Color;
@@ -24,11 +24,13 @@ export class Turret implements Updatable
     private movementSpeed = 2;
     private threadmillPoints: Vector3[] = [];
     private onThreadmillEndReached?: (turret: Turret) => void
+    private onTurretDestroyed?: (turret: Turret) => void
 
     private moveDir = new Vector3();
-    private shootDir = new Vector3();
     private lastShootTarget: Tile | undefined;
     private canShoot: boolean = false;
+
+    private bulletCounter: HTMLDivElement;
 
     constructor(pos: Vector3, color: Color, bullets: number, tileManager: TileManager)
     {
@@ -41,6 +43,14 @@ export class Turret implements Updatable
         this.obj.scale.setScalar(0.25);
         game.addObject(this.obj);
         game.addUpdatable(this);
+
+        this.bulletCounter = document.createElement("div");
+        this.bulletCounter.className = "counter";
+        this.bulletCounter.innerHTML = "" + this.bullets;
+        document.body.appendChild(this.bulletCounter);
+        this.updateCounter();
+
+        game.addListener_onWindowResized(() => { this.updateCounter(); });
     }
 
     public start(): void
@@ -93,6 +103,29 @@ export class Turret implements Updatable
         this.reservePos.copy(pos);
         this.isMovingToReserve = true;
     }
+    
+    public destroy()
+    {
+        if(this.onTurretDestroyed)
+            this.onTurretDestroyed(this);
+
+        game.removeUpdatable(this);
+        game.removeObject(this.obj);
+        this.obj.geometry.dispose();
+        (this.obj.material as Material).dispose();
+        this.obj.dispose();
+        document.body.removeChild(this.bulletCounter);
+    }
+
+    public addListener_onTurretDestroyed(callback: (turret: Turret) => void)
+    {
+        this.onTurretDestroyed = callback;
+    }
+    public removeListener_onTurretDestroyed()
+    {
+        this.onTurretDestroyed = undefined;
+    }
+
 
     private move()
     {
@@ -103,6 +136,8 @@ export class Turret implements Updatable
         this.moveDir.copy(target).sub(this.obj.position).normalize();
         this.moveDir.multiplyScalar(this.movementSpeed * game.deltaTime);
         this.obj.position.add(this.moveDir);
+
+        this.updateCounter();
 
         if(target.distanceToSquared(this.obj.position) < 0.001)
         {
@@ -130,6 +165,14 @@ export class Turret implements Updatable
         }
     }
 
+    private updateCounter()
+    {
+        this.moveDir.copy(this.obj.position).project(game.cameraObject);
+        this.bulletCounter.style.left = `${(this.moveDir.x + 1) / 2 * window.innerWidth}px`;
+        this.bulletCounter.style.top = `${-(this.moveDir.y - 1) / 2 * window.innerHeight}px`;
+        this.bulletCounter.innerHTML = "" + this.bullets;
+    }
+
     
     private spawnBullet(target: Tile)
     {
@@ -137,5 +180,11 @@ export class Turret implements Updatable
             bullet.destroy();
             this.tileManager.destroyTile(target);
         });
+        this.bullets--;
+        this.bulletCounter.innerHTML = "" + this.bullets;
+        if(this.bullets <= 0)
+        {
+            this.destroy();
+        }
     }
 }

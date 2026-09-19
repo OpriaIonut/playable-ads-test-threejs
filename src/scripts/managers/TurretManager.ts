@@ -19,6 +19,8 @@ export class TurretManager
 
     private zPadding = 0.4;
     private bulletsPerTurret = 20;
+    private threadmillLimit = 5;
+    private turretsOnThreadmill = 0;
 
     private turretSpawnPoints: Vector3[] = [
         new Vector3(-0.6, 0, 1.5),
@@ -36,6 +38,10 @@ export class TurretManager
     private availableTurrets: Turret[][] = []; //Holds turrets per column (ex: [column][row])
     private threadmillPositions: Vector3[] = [];
 
+    private aux: Vector3 = new Vector3();
+    private threadmillCounterWorldPos: Vector3 = new Vector3(-1.25, 0, 0.5);
+    private threadmillCounter: HTMLDivElement;
+
     constructor(tileManager: TileManager, threadmill: Threadmill)
     {
         this.tiles = tileManager;
@@ -48,10 +54,17 @@ export class TurretManager
         }
 
         game.canvasElement.addEventListener('pointerdown', this.onPointerDown);
+        game.addListener_onWindowResized(() => { this.updateCounter(); });
+
+        this.threadmillCounter = document.createElement("div");
+        this.threadmillCounter.className = "counter";
+        document.body.appendChild(this.threadmillCounter);
     }
 
     public spawnTurrets()
     {
+        this.updateCounter();
+
         let colorsToSpawn: Color[] = [];
         this.tiles.colorMap.forEach((value: number, key: Color) => {
             let turretsNeeded = value / this.bulletsPerTurret;
@@ -76,6 +89,7 @@ export class TurretManager
 
             let turret = new Turret(pos, colorsToSpawn[turretIndex], this.bulletsPerTurret, this.tiles);
             turret.setLocationProperties(-1, spawnPointIndex, row);
+            turret.addListener_onTurretDestroyed((turret: Turret) => { this.turretsOnThreadmill--; this.updateCounter(); });
             this.availableTurrets[spawnPointIndex].push(turret);
 
             spawnPointIndex++;
@@ -102,6 +116,12 @@ export class TurretManager
 
     private onValidTurretClicked(turret: Turret)
     {
+        if(this.turretsOnThreadmill >= this.threadmillLimit)
+            return;
+
+        this.turretsOnThreadmill++;
+        this.updateCounter();
+
         let reserveIndex = turret.getReserveIndex();
         if(reserveIndex >= 0 && reserveIndex < this.turretReserve.length)
             this.turretReserve[reserveIndex].heldTurret = undefined;
@@ -127,9 +147,20 @@ export class TurretManager
                 turret.setLocationProperties(index, -1, -1);
                 turret.moveToReserve(this.turretReserve[index].pos);
                 this.turretReserve[index].heldTurret = turret;
+
+                this.turretsOnThreadmill--;
+                this.updateCounter();
                 return;
             }
         }
+    }
+
+    private updateCounter()
+    {
+        this.threadmillCounter.innerHTML = `${this.threadmillLimit - this.turretsOnThreadmill} / ${this.threadmillLimit}`;
+        this.aux.copy(this.threadmillCounterWorldPos).project(game.cameraObject);
+        this.threadmillCounter.style.left = `${(this.aux.x + 1) / 2 * window.innerWidth}px`;
+        this.threadmillCounter.style.top = `${-(this.aux.y - 1) / 2 * window.innerHeight}px`;
     }
 
     private readonly onPointerDown = (event: PointerEvent): void =>

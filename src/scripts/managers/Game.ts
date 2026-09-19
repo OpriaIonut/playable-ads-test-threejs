@@ -9,6 +9,7 @@ export class Game
 
     private gameStarted = false;
     private updatables = new Set<Updatable>();
+    private resizeListeners = new Set<() => void>();
     private animationFrameId: number | undefined;
     
     private texLoader: TextureLoader;
@@ -47,6 +48,16 @@ export class Game
     public removeUpdatable(updatable: Updatable): void
     {
         this.updatables.delete(updatable);
+    }
+
+    public addListener_onWindowResized(listener: () => void): void
+    {
+        this.resizeListeners.add(listener);
+    }
+
+    public removeListener_onWindowResized(listener: () => void): void
+    {
+        this.resizeListeners.delete(listener);
     }
 
     public addObject(obj: Object3D)
@@ -108,6 +119,7 @@ export class Game
     public dispose(): void
     {
         window.removeEventListener('resize', this.resize);
+        this.resizeListeners.clear();
 
         if (this.animationFrameId !== undefined)
         {
@@ -138,5 +150,10 @@ export class Game
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight, false);
+
+        for (const listener of this.resizeListeners)
+        {
+            listener();
+        }
     }
 }
