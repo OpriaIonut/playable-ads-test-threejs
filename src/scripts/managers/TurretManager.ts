@@ -42,6 +42,9 @@ export class TurretManager
     private threadmillCounterWorldPos: Vector3 = new Vector3(-1.25, 0, 0.5);
     private threadmillCounter: HTMLDivElement;
 
+    private hasGameEnded: boolean = false;
+    private endGameText: HTMLDivElement;
+
     constructor(tileManager: TileManager, threadmill: Threadmill)
     {
         this.tiles = tileManager;
@@ -56,10 +59,18 @@ export class TurretManager
         game.canvasElement.addEventListener('pointerdown', this.onPointerDown);
         game.addListener_onWindowResized(() => { this.updateCounter(); });
 
+        this.tiles.addListener_onAllTilesDestroyed(() => { this.endGame(true); });
+
         this.threadmillCounter = document.createElement("div");
         this.threadmillCounter.className = "counter";
         document.body.appendChild(this.threadmillCounter);
+
+        this.endGameText = document.createElement("div");
+        this.endGameText.id = "endGameText";
+        document.body.appendChild(this.endGameText);
     }
+
+    public getHasGameEnded(): boolean { return this.hasGameEnded; }
 
     public spawnTurrets()
     {
@@ -153,6 +164,7 @@ export class TurretManager
                 return;
             }
         }
+        this.endGame(false);
     }
 
     private updateCounter()
@@ -163,8 +175,18 @@ export class TurretManager
         this.threadmillCounter.style.top = `${-(this.aux.y - 1) / 2 * window.innerHeight}px`;
     }
 
+    private endGame(wasGameWon: boolean)
+    {
+        this.hasGameEnded = true;
+        this.endGameText.innerHTML = wasGameWon ? "GAME WON!" : "GAME OVER!";
+        this.endGameText.style.color = wasGameWon ? "#00ff00" : "#ff0000";
+    }
+
     private readonly onPointerDown = (event: PointerEvent): void =>
     {
+        if(this.hasGameEnded)
+            return;
+
         const canvas = game.canvasElement;
         const bounds = canvas.getBoundingClientRect();
         this.pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;

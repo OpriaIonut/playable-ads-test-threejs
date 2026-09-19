@@ -20,9 +20,12 @@ export class TileManager
     private colorKeys = new Map<string, Color>();
     private cubeGeometry = new RoundedBoxGeometry(1, 1, 1, 1, 0.25);
 
+    private remainingTiles = 0;
+
     private areTilesGenerated = false;
     private spawnedTiles: (Tile | undefined)[][] = [];
     private onTilesGenerated?: () => void;
+    private onAllTilesDestroyed?: () => void;
 
     public constructor(imgPath: string, bounds: Box3, padding = 0.01, tileHeight: number = 0.5)
     {
@@ -37,6 +40,7 @@ export class TileManager
     {
         return this.colors;
     }
+    public getRemainingTiles(): number { return this.remainingTiles; }
 
     public getGridCenter() { return this.bounds.getCenter(new Vector3()); }
 
@@ -51,6 +55,15 @@ export class TileManager
         this.onTilesGenerated = undefined;
     }
 
+    public addListener_onAllTilesDestroyed(callback: () => void)
+    {
+        this.onAllTilesDestroyed = callback;
+    }
+    public removeListener_onAllTilesDestroyed()
+    {
+        this.onAllTilesDestroyed = undefined;
+    }
+
     public markTileAsShot(tile: Tile)
     {
         if(this.spawnedTiles[tile.row][tile.col] != undefined)
@@ -63,6 +76,10 @@ export class TileManager
         (tile.mesh.material as Material).dispose();
         tile.mesh.dispose();
         this.spawnedTiles[tile.row][tile.col] = undefined;
+        
+        this.remainingTiles--;
+        if(this.remainingTiles <= 0 && this.onAllTilesDestroyed)
+            this.onAllTilesDestroyed();
     }
 
     public getClosestTile(pos: Vector3): Tile | undefined
@@ -162,6 +179,7 @@ export class TileManager
                     wasShot: false
                 }
                 this.spawnedTiles[pixelY].push(tile);
+                this.remainingTiles++;
             }
         }
 
