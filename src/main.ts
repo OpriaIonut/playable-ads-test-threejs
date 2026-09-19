@@ -32,7 +32,7 @@ game.addObject(groundPlane);
 
 //--------------------LOGIC
 const threadmill = new Threadmill();
-const tileManager = new TileManager("tiles.png", new Box3(new Vector3(-1, 0, -2), new Vector3(1, 0, 0)));
+const tileManager = new TileManager("test.png", new Box3(new Vector3(-1, 0, -2), new Vector3(1, 0, 0)));
 const turretManager = new TurretManager(tileManager, threadmill);
 tileManager.addListener_onTilesGenerated(() => { turretManager.spawnTurrets(); });
 

@@ -74,7 +74,7 @@ export class TurretManager
             let pos = this.turretSpawnPoints[spawnPointIndex].clone();
             pos.z += this.zPadding * row;
 
-            let turret = new Turret(pos, colorsToSpawn[turretIndex], this.bulletsPerTurret);
+            let turret = new Turret(pos, colorsToSpawn[turretIndex], this.bulletsPerTurret, this.tiles);
             turret.setLocationProperties(-1, spawnPointIndex, row);
             this.availableTurrets[spawnPointIndex].push(turret);
 
