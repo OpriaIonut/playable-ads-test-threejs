@@ -6,7 +6,8 @@ export declare type Tile = {
     mesh: Mesh,
     color: Color,
     col: number,
-    row: number
+    row: number,
+    wasShot: boolean
 }
 
 export class TileManager
@@ -50,12 +51,17 @@ export class TileManager
         this.onTilesGenerated = undefined;
     }
 
+    public markTileAsShot(tile: Tile)
+    {
+        if(this.spawnedTiles[tile.row][tile.col] != undefined)
+            this.spawnedTiles[tile.row][tile.col]!.wasShot =true;
+    }
+
     public destroyTile(tile: Tile)
     {
         game.removeObject(tile.mesh);
         (tile.mesh.material as Material).dispose();
         tile.mesh.dispose();
-
         this.spawnedTiles[tile.row][tile.col] = undefined;
     }
 
@@ -152,7 +158,8 @@ export class TileManager
                     mesh: cube,
                     color: color,
                     col: pixelX,
-                    row: pixelY
+                    row: pixelY,
+                    wasShot: false
                 }
                 this.spawnedTiles[pixelY].push(tile);
             }

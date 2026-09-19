@@ -159,7 +159,7 @@ export class Turret implements Updatable
         let target = this.tileManager.getClosestTile(this.obj.position);
         if(target != this.lastShootTarget)
         {
-            if(target != undefined && target.color.getStyle() == this.color.getStyle())
+            if(target != undefined && target.wasShot == false && target.color.getStyle() == this.color.getStyle())
                 this.spawnBullet(target);
             this.lastShootTarget = target;
         }
@@ -176,6 +176,7 @@ export class Turret implements Updatable
     
     private spawnBullet(target: Tile)
     {
+        this.tileManager.markTileAsShot(target);
         const bullet = new Bullet(this.obj.position, target.mesh.position, () => {
             bullet.destroy();
             this.tileManager.destroyTile(target);
