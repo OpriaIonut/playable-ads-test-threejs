@@ -14,20 +14,24 @@ export class TurretManager
 {
     private tiles: TileManager;
     private threadmill: Threadmill;
+
+    //Helps detecting on which turret we clicked
     private raycaster = new Raycaster();
     private pointer = new Vector2();
 
-    private zPadding = 0.4;
-    private bulletsPerTurret = 20;
-    private threadmillLimit = 5;
-    private turretsOnThreadmill = 0;
+    private zPadding = 0.4;             //Space to apply for new rows of turrets in the grid on the bottom of the screen
+    private bulletsPerTurret = 20;      //How many bullets a turret can shoot
+    private threadmillLimit = 5;        //How many turrets can at the same time on the threadmill
+    private turretsOnThreadmill = 0;    //Current number of turrets on the threadmill
 
+    //First row to spawn turrets in. Additional rows of turrets turrets will be spawned behind those points, by using the zPadding property
     private turretSpawnPoints: Vector3[] = [
         new Vector3(-0.6, 0, 1.5),
         new Vector3(-0.2, 0, 1.5),
         new Vector3(0.2, 0, 1.5),
         new Vector3(0.6, 0, 1.5),
     ];
+    //Turrets that reach the end of the trheadmill will go in this reserve. If the reserve gets full and a turret tries to enter it, will mark game over
     private turretReserve: TurretReserve[] = [
         { pos: new Vector3(-0.8, 0, 1), heldTurret: undefined },
         { pos: new Vector3(-0.4, 0, 1), heldTurret: undefined },
@@ -35,32 +39,40 @@ export class TurretManager
         { pos: new Vector3(0.4, 0, 1), heldTurret: undefined },
         { pos: new Vector3(0.8, 0, 1), heldTurret: undefined },
     ];
-    private availableTurrets: Turret[][] = []; //Holds turrets per column (ex: [column][row])
-    private threadmillPositions: Vector3[] = [];
+    private availableTurrets: Turret[][] = []; //Holds turrets per column in the lower part of the screen (ex: [column][row])
+    private threadmillPositions: Vector3[] = []; //Caching positions along the threadmill to pass into each turret object
 
     private aux: Vector3 = new Vector3();
+
+    //UI element to tell the user how many turrets can be on the threadmill
     private threadmillCounterWorldPos: Vector3 = new Vector3(-1.25, 0, 0.5);
     private threadmillCounter: HTMLDivElement;
 
     private hasGameEnded: boolean = false;
-    private endGameText: HTMLDivElement;
+    private endGameText: HTMLDivElement;    //Text displayed once the player wins/loses the game
 
+    /**
+     * Main script which controls all of the turret-relevant logic and the end game condition
+     */
     constructor(tileManager: TileManager, threadmill: Threadmill)
     {
         this.tiles = tileManager;
         this.threadmill = threadmill;
         this.threadmillPositions = this.threadmill.getPathPoints(50);
 
+        //Generate the turret reserve
         for(let index = 0; index < this.turretReserve.length; ++index)
         {
             this.spawnTurretReserve(this.turretReserve[index].pos);
         }
 
+        //Initialize event listeners
         game.canvasElement.addEventListener('pointerdown', this.onPointerDown);
         game.addListener_onWindowResized(() => { this.updateCounter(); });
 
         this.tiles.addListener_onAllTilesDestroyed(() => { this.endGame(true); });
 
+        //Initialize ui elements
         this.threadmillCounter = document.createElement("div");
         this.threadmillCounter.className = "counter";
         document.body.appendChild(this.threadmillCounter);
@@ -72,10 +84,14 @@ export class TurretManager
 
     public getHasGameEnded(): boolean { return this.hasGameEnded; }
 
+    /**
+     * Spawn turrets on the bottom of the screen. Called after tiles finish loading because it's dependent on their data
+     */
     public spawnTurrets()
     {
         this.updateCounter();
 
+        //Make a list of how many turrets we need to spawn of each color, and shuffle it to be in random order
         let colorsToSpawn: Color[] = [];
         this.tiles.colorMap.forEach((value: number, key: Color) => {
             let turretsNeeded = value / this.bulletsPerTurret;
@@ -86,11 +102,13 @@ export class TurretManager
         });
         colorsToSpawn = this.shuffle(colorsToSpawn);
 
+        //Initialize the 2D grid
         for(let index = 0; index < this.turretSpawnPoints.length; ++index)
         {
             this.availableTurrets[index] = [];
         }
 
+        //Go through each color and spawn a turret for it
         let spawnPointIndex = 0;
         let row = 0;
         for(let turretIndex = 0; turretIndex < colorsToSpawn.length; ++turretIndex)
@@ -99,10 +117,11 @@ export class TurretManager
             pos.z += this.zPadding * row;
 
             let turret = new Turret(pos, colorsToSpawn[turretIndex], this.bulletsPerTurret, this.tiles);
-            turret.setLocationProperties(-1, spawnPointIndex, row);
-            turret.addListener_onTurretDestroyed((turret: Turret) => { this.turretsOnThreadmill--; this.updateCounter(); });
+            turret.setLocationProperties(-1, spawnPointIndex, row); //Tell the turret where it currently sits (helps with later calculations)
+            turret.addListener_onTurretDestroyed(() => { this.turretsOnThreadmill--; this.updateCounter(); });
             this.availableTurrets[spawnPointIndex].push(turret);
 
+            //We spawn the turrets per row, so increase the row once we reach the last spawn point
             spawnPointIndex++;
             if(spawnPointIndex >= this.turretSpawnPoints.length)
             {
@@ -117,6 +136,9 @@ export class TurretManager
         game.canvasElement.removeEventListener('pointerdown', this.onPointerDown);
     }
     
+    /**
+     * Create graphics for the turret reserve
+     */
     private spawnTurretReserve(pos: Vector3)
     {
         let sphere = new Mesh(new RoundedBoxGeometry(1, 1, 1, 2, 0.25), new MeshStandardMaterial({ color: '#31334e' }));
@@ -125,30 +147,43 @@ export class TurretManager
         game.addObject(sphere);
     }
 
+    /**
+     * Called when we click on a turret and we can add it to the threadmill (either sits on row 0 or in the reserve)
+     * @param turret 
+     * @returns 
+     */
     private onValidTurretClicked(turret: Turret)
     {
+        //If we reached our limit, don't do anything
         if(this.turretsOnThreadmill >= this.threadmillLimit)
             return;
 
         this.turretsOnThreadmill++;
         this.updateCounter();
 
+        //Remove the turret from where it was previously
         let reserveIndex = turret.getReserveIndex();
         if(reserveIndex >= 0 && reserveIndex < this.turretReserve.length)
             this.turretReserve[reserveIndex].heldTurret = undefined;
         else
         {
+            //If the turret was in the grid, move all turrets up by one
             let column = turret.getColumn();
             for(let index = 1; index < this.availableTurrets[column].length; ++index)
             {
-                this.availableTurrets[column][index].moveToReserve(this.availableTurrets[column][index - 1].getObject3D().position);
+                this.availableTurrets[column][index].moveToSpecificTarget(this.availableTurrets[column][index - 1].getObject3D().position);
                 this.availableTurrets[column][index].setLocationProperties(-1, column, index - 1);
             }
+            //Erase index 0 (will make index 1 the new index 0)
             this.availableTurrets[column].splice(0, 1);
         }
+        //Tell the turret to start moving on the threadmill
         turret.startThreadmillMovement(this.threadmillPositions, (turret) => { this.onTurretReachedthreadmillEnd(turret); });
     }
 
+    /**
+     * Called when a turret reaches the end of the threadmill. Will add it to the reserve or trigger game over if the reserve is full
+     */
     private onTurretReachedthreadmillEnd(turret: Turret)
     {
         for(let index = 0; index < this.turretReserve.length; ++index)
@@ -156,7 +191,7 @@ export class TurretManager
             if(this.turretReserve[index].heldTurret == undefined)
             {
                 turret.setLocationProperties(index, -1, -1);
-                turret.moveToReserve(this.turretReserve[index].pos);
+                turret.moveToSpecificTarget(this.turretReserve[index].pos);
                 this.turretReserve[index].heldTurret = turret;
 
                 this.turretsOnThreadmill--;
@@ -164,9 +199,13 @@ export class TurretManager
                 return;
             }
         }
+        //If all reserves were full, trigger game over
         this.endGame(false);
     }
 
+    /**
+     * Update the threadmill counter position
+     */
     private updateCounter()
     {
         this.threadmillCounter.innerHTML = `${this.threadmillLimit - this.turretsOnThreadmill} / ${this.threadmillLimit}`;
@@ -175,6 +214,9 @@ export class TurretManager
         this.threadmillCounter.style.top = `${-(this.aux.y - 1) / 2 * window.innerHeight}px`;
     }
 
+    /**
+     * Trigger game won/over
+     */
     private endGame(wasGameWon: boolean)
     {
         this.hasGameEnded = true;
@@ -182,17 +224,22 @@ export class TurretManager
         this.endGameText.style.color = wasGameWon ? "#00ff00" : "#ff0000";
     }
 
+    /**
+     * Called when the user clicks the page. Will raycast to available turrets and if one of them is clicked, will invoke onValidTurretClicked
+     */
     private readonly onPointerDown = (event: PointerEvent): void =>
     {
         if(this.hasGameEnded)
             return;
 
+        //Initialize the raycaster
         const canvas = game.canvasElement;
         const bounds = canvas.getBoundingClientRect();
         this.pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
         this.pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
         this.raycaster.setFromCamera(this.pointer, game.cameraObject);
 
+        //Create the list of turrets that we can raycast to
         const turrets: Turret[] = this.getTurretRaycastTargets();
         const raycastTargets = turrets.map(turret => turret.getObject3D());
 
@@ -201,11 +248,15 @@ export class TurretManager
         if (!hitObject)
             return;
 
+        //If we hit a valid turret, invoke onValidTurretClicked
         let result = this.validateRaycastTarget(turrets, hitObject);
         if (result.isValid && result.turret != undefined)
             this.onValidTurretClicked(result.turret);
     }
 
+    /**
+     * Create a list of turrets onto which we can raycast (sit on the first row, or in the reserve)
+     */
     private getTurretRaycastTargets()
     {       
         let turrets: Turret[] = [];
@@ -222,6 +273,9 @@ export class TurretManager
         return turrets;
     }
 
+    /**
+     * Check to see the hit object is a valid target and extract the turret from the hit obj
+     */
     private validateRaycastTarget(turrets: Turret[], hitObj: Object3D): { isValid: boolean, turret?: Turret }
     {        
         for(let index = 0; index < turrets.length; ++index)
@@ -242,6 +296,9 @@ export class TurretManager
         return { isValid: false };
     }
 
+    /**
+     * Utility function to shuffle arrays
+     */
     private shuffle<T>(array: T[]): T[]
     {
         for (let i = array.length - 1; i > 0; i--)

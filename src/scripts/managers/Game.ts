@@ -1,23 +1,28 @@
 import { Color, Object3D, PerspectiveCamera, WebGLRenderer, Scene, Vector3, TextureLoader } from 'three'
-import type { Updatable } from '../../interfaces'
+import type { IUpdatable } from '../../interfaces'
 
 export class Game
 {
-    private scene: Scene;
-    private renderer: WebGLRenderer;
-    private camera: PerspectiveCamera;
+    private scene: Scene;               //Root of our rendering structure. All objects which will be rendered will be added to this
+    private renderer: WebGLRenderer;    //Main renderer used to draw our scene
+    private camera: PerspectiveCamera;  //Camera used to draw our scene
 
-    private gameStarted = false;
-    private updatables = new Set<Updatable>();
-    private resizeListeners = new Set<() => void>();
-    private animationFrameId: number | undefined;
+    private gameStarted = false;                        //Set to true when the game loop starts
+    private updatables = new Set<IUpdatable>();         //List of all scripts that we need to call every frame in the game loop
+    private resizeListeners = new Set<() => void>();    //Listeners for the window resize event
+    private animationFrameId: number | undefined;       //Can be used to stop the game loop
     
-    private texLoader: TextureLoader;
+    private texLoader: TextureLoader;   //Main loader for all textures in the codebase
 
+    //Time properties
     private currentTimeValue = 0;
     private deltaTimeValue = 0;
     private previousTime = 0;
 
+    /**
+     * Main class which handles all rendering-related logic and holds the game loop
+     * @param canvas 
+     */
     public constructor(canvas: HTMLCanvasElement)
     {
         this.scene = new Scene();
@@ -35,7 +40,10 @@ export class Game
         this.resize();
     }
 
-    public addUpdatable(updatable: Updatable): void
+    /**
+     * Mark a script to be called in every update function. If game was started already, also calls it's start function
+     */
+    public addUpdatable(updatable: IUpdatable): void
     {
         if (this.updatables.has(updatable))
             return;
@@ -45,11 +53,25 @@ export class Game
         if (this.gameStarted)
             updatable.start();
     }
-    public removeUpdatable(updatable: Updatable): void
+    public removeUpdatable(updatable: IUpdatable): void
     {
         this.updatables.delete(updatable);
     }
 
+    /**
+     * Mark a 3D object to be rendered
+     * @param obj 
+     */
+    public addObject(obj: Object3D)
+    {
+        this.scene.add(obj);
+    }
+    public removeObject(obj: Object3D)
+    {
+        this.scene.remove(obj);
+    }
+
+    //Event listeners
     public addListener_onWindowResized(listener: () => void): void
     {
         this.resizeListeners.add(listener);
@@ -60,38 +82,14 @@ export class Game
         this.resizeListeners.delete(listener);
     }
 
-    public addObject(obj: Object3D)
-    {
-        this.scene.add(obj);
-    }
-    public removeObject(obj: Object3D)
-    {
-        this.scene.remove(obj);
-    }
+    //Getters for different properties that other scripts would need
+    public get currentTime(): number                { return this.currentTimeValue; }
+    public get deltaTime(): number                  { return this.deltaTimeValue; }
+    public get textureLoader(): TextureLoader       { return this.texLoader; }
+    public get cameraObject(): PerspectiveCamera    { return this.camera; }
+    public get canvasElement(): HTMLCanvasElement   { return this.renderer.domElement; }
 
-    public get currentTime(): number
-    {
-        return this.currentTimeValue;
-    }
-    public get deltaTime(): number
-    {
-        return this.deltaTimeValue;
-    }
-    public get textureLoader(): TextureLoader
-    {
-        return this.texLoader;
-    }
-
-    public get cameraObject(): PerspectiveCamera
-    {
-        return this.camera;
-    }
-
-    public get canvasElement(): HTMLCanvasElement
-    {
-        return this.renderer.domElement;
-    }
-
+    //Functions to control the camera
     public setCameraPos(pos: Vector3)
     {
         this.camera.position.copy(pos);
@@ -101,6 +99,10 @@ export class Game
         this.camera.lookAt(pos);
     }
 
+    /**
+     * Call the start function on all Updatable objects added to the list and start the game loop
+     * @returns 
+     */
     public start(): void
     {
         if (this.gameStarted)
@@ -116,6 +118,9 @@ export class Game
         this.animationFrameId = requestAnimationFrame(this.update);
     }
 
+    /**
+     * Destroy the game class and get rid of data
+     */
     public dispose(): void
     {
         window.removeEventListener('resize', this.resize);
@@ -130,6 +135,9 @@ export class Game
         this.renderer.dispose();
     }
 
+    /**
+     * Main game loop
+     */
     private readonly update = (timestamp: number): void =>
     {
         this.currentTimeValue = timestamp / 1000;
@@ -145,6 +153,9 @@ export class Game
         this.animationFrameId = requestAnimationFrame(this.update);
     }
 
+    /**
+     * Called when the window gets resized
+     */
     private readonly resize = (): void =>
     {
         this.camera.aspect = window.innerWidth / window.innerHeight;

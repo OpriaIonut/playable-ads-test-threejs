@@ -1,10 +1,10 @@
-import { BufferGeometry, CatmullRomCurve3, Line, LineBasicMaterial, Mesh, MeshStandardMaterial, SphereGeometry, Vector3 } from "three";
+import { BufferGeometry, CatmullRomCurve3, Line, LineBasicMaterial, Material, Vector3 } from "three";
 import { game } from "../../main";
 
 export class Threadmill
 {
-    private curve: CatmullRomCurve3;
-    private curvePoints = [
+    private curve: CatmullRomCurve3; //Main curve for the turrets to follow
+    private curvePoints = [ //Anchor points used to initialize the curve
         //Bottom lane
         new Vector3(-1, 0, 0.5),
         new Vector3(1.0, 0, 0.5),
@@ -25,19 +25,22 @@ export class Threadmill
         new Vector3(-1.4, 0, 0)
     ];
 
+    private curveObject: Line;
+
+    /**
+     * Class which initializes the graphics for the threadmill on which the turrets move and contains the path that the turrets should follow
+     */
     constructor()
     {
+        //Create the curve
         this.curve = new CatmullRomCurve3(this.curvePoints, false, 'centripetal', 1.0);
+
+        //Generate the geometry for the curve. Currently it's debug geometry, later will use proper 3D meshes
         const points = this.curve.getPoints( 50 );
         const geometry = new BufferGeometry().setFromPoints( points );
         const material = new LineBasicMaterial( { color: 0x00ffff } );
-        const curveObject = new Line( geometry, material );
-        game.addObject(curveObject);
-        
-        // for(let index = 0; index < positions.length; ++index)
-        // {
-        //     this.spawnDebugSpheres(positions[index])
-        // }
+        this.curveObject = new Line( geometry, material );
+        game.addObject(this.curveObject);
     }
 
     public getPathPoints(numPoints: number)
@@ -45,11 +48,10 @@ export class Threadmill
         return this.curve.getPoints(numPoints);
     }
 
-    private spawnDebugSpheres(pos: Vector3)
+    public dispose()
     {
-        let sphere = new Mesh(new SphereGeometry(), new MeshStandardMaterial());
-        sphere.position.copy(pos);
-        sphere.scale.setScalar(0.1);
-        game.addObject(sphere);
+        this.curveObject.geometry.dispose();
+        (this.curveObject.material as Material).dispose();
+        this.curveObject.dispose();
     }
 }

@@ -7,7 +7,7 @@ import { TurretManager } from './scripts/managers/TurretManager'
 
 //--------------------GAME CREATION
 const canvas = document.querySelector<HTMLCanvasElement>('#mainCanvas')!;
-export const game = new Game(canvas);
+export const game = new Game(canvas); //Responsible for all rendering-related logic & game loop
 
 game.setCameraPos(new Vector3(0, 5, 2));
 game.cameraLookAt(new Vector3(0, 0, 0));
@@ -31,9 +31,15 @@ game.addObject(groundPlane);
 
 
 //--------------------LOGIC
+//Holds visuals and curve logic for the path that the turrets should follow when shooting
 const threadmill = new Threadmill();
-const tileManager = new TileManager("test.png", new Box3(new Vector3(-1, 0, -2), new Vector3(1, 0, 0)));
+
+//Initializez & manages the tiles that we need to destroy to win the game. Is initialized through a small texture in which each pixel is equivalent to a tile (transparent pixels are skipped)
+const tileManager = new TileManager("tiles.png", new Box3(new Vector3(-1, 0, -2), new Vector3(1, 0, 0)));
+
+//Main class which holds all of the turret relevant logic (spawn turrets, turret reserve, make them move on the threadmill, game over condition, etc.)
 const turretManager = new TurretManager(tileManager, threadmill);
 tileManager.addListener_onTilesGenerated(() => { turretManager.spawnTurrets(); });
 
+//After everything finished initializing, start the game
 game.start();
