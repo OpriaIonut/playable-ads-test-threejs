@@ -1,5 +1,5 @@
-import { Color, Object3D, PerspectiveCamera, WebGLRenderer, Scene } from 'three'
-import type { Updatable } from './interfaces'
+import { Color, Object3D, PerspectiveCamera, WebGLRenderer, Scene, Vector3, TextureLoader } from 'three'
+import type { Updatable } from '../interfaces'
 
 export class Game
 {
@@ -11,6 +11,8 @@ export class Game
     private updatables = new Set<Updatable>()
     private animationFrameId: number | undefined
     
+    private texLoader: TextureLoader
+
     private currentTimeValue = 0
     private deltaTimeValue = 0
     private previousTime = 0
@@ -25,6 +27,8 @@ export class Game
         
         this.renderer = new WebGLRenderer({ canvas, antialias: true })
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+        this.texLoader = new TextureLoader()
 
         window.addEventListener('resize', this.resize)
         this.resize()
@@ -58,10 +62,22 @@ export class Game
     {
         return this.currentTimeValue
     }
-
     public get deltaTime(): number
     {
         return this.deltaTimeValue
+    }
+    public get textureLoader(): TextureLoader
+    {
+        return this.texLoader
+    }
+
+    public setCameraPos(pos: Vector3)
+    {
+        this.camera.position.copy(pos)
+    }
+    public cameraLookAt(pos: Vector3)
+    {
+        this.camera.lookAt(pos)
     }
 
     public start(): void
