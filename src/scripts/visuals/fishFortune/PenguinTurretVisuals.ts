@@ -1,8 +1,8 @@
 import { Color, Mesh, MeshStandardMaterial, Object3D } from "three";
-import type { ITurretVisuals } from "../../interfaces";
-import { game, themeFactory } from "../../main";
+import type { ITurretVisuals } from "../../../interfaces";
+import { game, themeFactory } from "../../../main";
 
-export class PigTurretVisuals implements ITurretVisuals
+export class PenguinTurretVisuals implements ITurretVisuals
 {
     public readonly gfx: Object3D = new Object3D();
     private initialized: boolean = false;
@@ -10,7 +10,7 @@ export class PigTurretVisuals implements ITurretVisuals
 
     public initialize(): void
     {
-        game.modelLoader.load("meshes/pixelFlow/pig.glb", (data) => {
+        game.modelLoader.load("meshes/fishFortune/penguin.glb", (data) => {
             const obj = data.model.clone(true);
             obj.traverse((child) => {
                 if (child instanceof Mesh)
@@ -20,7 +20,7 @@ export class PigTurretVisuals implements ITurretVisuals
                         : child.material.clone();
                 }
             });
-            game.enableShadows(obj);
+            // game.enableShadows(obj);
 
             obj.scale.setScalar(2.75);
             this.gfx.add(obj);

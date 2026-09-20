@@ -16,7 +16,7 @@ game.setCameraPos(new Vector3(0, 5, 2));
 game.cameraLookAt(new Vector3(0, 0, 0));
 
 //If you want to change all of the visuals of the game, change this property
-const selectedTheme: GameThemes = GameThemes.PixelFlow;
+const selectedTheme: GameThemes = GameThemes.FishOfFortune;
 export const themeFactory = new ThemeFactory(selectedTheme);
 
 //--------------------ENVIRONMENT
@@ -41,7 +41,7 @@ game.addObject(directionalLight);
 
 const groundPlane = new Mesh(
   new PlaneGeometry(1, 1),
-  new MeshStandardMaterial({ color: '#4b4d6a' })
+  themeFactory.getGroundMaterial()
 );
 groundPlane.rotation.set(-Math.PI * 0.5, 0.0, 0.0);
 groundPlane.scale.set(20, 20, 1);

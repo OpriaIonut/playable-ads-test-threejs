@@ -1,10 +1,14 @@
-import { BufferGeometry, Material, Object3D, Texture } from "three";
+import { BufferGeometry, Color, Material, MeshStandardMaterial, Object3D, Texture } from "three";
 import type { IVisuals } from "../../interfaces";
 import { BulletVisuals } from "../visuals/BulletVisuals";
-import { ThreadmillVisuals } from "../visuals/ThreadmillVisuals";
-import { PixelFlowReserveVisuals } from "../visuals/PixelFlowReserveVisuals";
-import { PigTurretVisuals } from "../visuals/PigTurretVisuals";
+import { PixelFlowThreadmillVisuals } from "../visuals/pixelFlow/PixelFlowThreadmillVisuals";
+import { PixelFlowReserveVisuals } from "../visuals/pixelFlow/PixelFlowReserveVisuals";
+import { PigTurretVisuals } from "../visuals/pixelFlow/PigTurretVisuals";
 import { TapVisuals } from "../visuals/TapVisuals";
+import { FishFortuneThreadmillVisuals } from "../visuals/fishFortune/FishFortuneThreadmillVisuals";
+import { WaterMaterial } from "../shaders/WaterMaterial";
+import { FishFortuneReserveVisuals } from "../visuals/fishFortune/FishFortuneReserveVisuals";
+import { PenguinTurretVisuals } from "../visuals/fishFortune/PenguinTurretVisuals";
 
 export enum GameThemes {
     PixelFlow,
@@ -41,14 +45,29 @@ export class ThemeFactory
         return visuals;
     }
 
+    public getCurveHeight(): number
+    {
+        switch(this.currentTheme)
+        {
+            case GameThemes.PixelFlow:
+                return 0.35;
+            case GameThemes.FishOfFortune:
+            default:
+                return 0.0;
+        }
+    }
+
     public getThreadmillVisuals(autoInitialize: boolean): IVisuals
     {
         let visuals: IVisuals;
         switch(this.currentTheme)
         {
+            case GameThemes.FishOfFortune:
+                visuals = new FishFortuneThreadmillVisuals();
+                break;
             case GameThemes.PixelFlow:
             default:
-                visuals = new ThreadmillVisuals();
+                visuals = new PixelFlowThreadmillVisuals();
                 break;
         }
         if(autoInitialize)
@@ -61,6 +80,9 @@ export class ThemeFactory
         let visuals: IVisuals;
         switch(this.currentTheme)
         {
+            case GameThemes.FishOfFortune:
+                visuals = new FishFortuneReserveVisuals();
+                break;
             case GameThemes.PixelFlow:
             default:
                 visuals = new PixelFlowReserveVisuals();
@@ -76,6 +98,9 @@ export class ThemeFactory
         let visuals: IVisuals;
         switch(this.currentTheme)
         {
+            case GameThemes.FishOfFortune:
+                visuals = new PenguinTurretVisuals();
+                break;
             case GameThemes.PixelFlow:
             default:
                 visuals = new PigTurretVisuals();
@@ -84,6 +109,18 @@ export class ThemeFactory
         if(autoInitialize)
             visuals.initialize();
         return visuals;
+    }
+
+    public getGroundMaterial(): Material
+    {
+        switch(this.currentTheme)
+        {
+            case GameThemes.FishOfFortune:
+                return WaterMaterial.create(new Color('#0097c1'), new Color('#22cbde'), new Color('#0079b2'))
+            case GameThemes.PixelFlow:
+            default:
+                return new MeshStandardMaterial({ color: '#4b4d6a' });
+        }
     }
 
     /**

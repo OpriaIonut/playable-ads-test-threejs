@@ -1,9 +1,9 @@
 import { Material, Mesh, Object3D, Texture } from "three";
-import type { IVisuals } from "../../interfaces";
-import { game, outlinedObjects, themeFactory } from "../../main";
-import { MovingThreadmillMaterial } from "../shaders/MovingThreadmillMaterial";
+import type { IVisuals } from "../../../interfaces";
+import { game, outlinedObjects, themeFactory } from "../../../main";
+import { MovingThreadmillMaterial } from "../../shaders/MovingThreadmillMaterial";
 
-export class ThreadmillVisuals implements IVisuals
+export class PixelFlowThreadmillVisuals implements IVisuals
 {
     public readonly gfx: Object3D = new Object3D();
     private initialized: boolean = false;
