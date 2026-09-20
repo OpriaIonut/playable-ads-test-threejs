@@ -9,8 +9,8 @@ export class FadingGradientMaterial
     {
         return new ShaderMaterial({
             transparent: true,
-            vertexShader: fadingGradientVS,
-            fragmentShader: fadingGradientFS,
+            vertexShader: fadingGradientVert,
+            fragmentShader: fadingGradientFrag,
             uniforms: {
                 u_basicColor: { value: color },
                 u_tailOpacity: { value: tailOpacity },
@@ -20,7 +20,7 @@ export class FadingGradientMaterial
     }
 }
 
-const fadingGradientVS = `
+const fadingGradientVert = `
 varying vec2 v_uv;
 
 void main()
@@ -30,7 +30,7 @@ void main()
 }
 `;
 
-const fadingGradientFS = `
+const fadingGradientFrag = `
 varying vec2 v_uv;
 
 uniform vec3 u_basicColor;

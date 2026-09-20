@@ -1,6 +1,7 @@
-import { Object3D } from "three";
+import { Material, Mesh, Object3D, Texture } from "three";
 import type { IVisuals } from "../../interfaces";
 import { game, themeFactory } from "../../main";
+import { MovingThreadmillMaterial } from "../shaders/MovingThreadmillMaterial";
 
 export class ThreadmillVisuals implements IVisuals
 {
@@ -9,18 +10,33 @@ export class ThreadmillVisuals implements IVisuals
     private meshesLoaded: number = 0;
     private onVisualsInitializedListeners = new Set<() => void>();
 
+    private threadmillTexture?: Texture;
+
     public initialize(): void
     {
-        game.modelLoader.load("meshes/pixelFlow/threadmill.glb", (data) => {
-            const obj = data.model.clone(true);
-            obj.scale.setScalar(0.9);
-            obj.position.set(-0.05, 0, -1.0);
-            this.gfx.add(obj);
+        game.textureLoader.load("textures/LaneArrow.png", (tex) => {
+            this.threadmillTexture = tex;
+            game.modelLoader.load("meshes/pixelFlow/threadmill.glb", (data) => {
+                const obj = data.model.clone(true);
+                obj.scale.setScalar(0.9);
+                obj.position.set(-0.05, 0, -1.0);
+                this.gfx.add(obj);
 
-            this.meshesLoaded++;
-            if(this.meshesLoaded >= 2)
-                this.onInitialized();
+                obj.traverse((item) => {
+                    if(item instanceof Mesh)
+                    {
+                        const mesh = item as Mesh;
+                        if((mesh.material as Material).name == "ThreadmillLane")
+                            mesh.material = MovingThreadmillMaterial.create(22, 0.25, game.currentTimeUniform, this.threadmillTexture as Texture);
+                    }
+                });
+
+                this.meshesLoaded++;
+                if(this.meshesLoaded >= 2)
+                    this.onInitialized();
+            });
         });
+
         game.modelLoader.load("meshes/pixelFlow/threadmillBox.glb", (data) => {
             const obj = data.model.clone(true);
             obj.scale.setScalar(0.9);

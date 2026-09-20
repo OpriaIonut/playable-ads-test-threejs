@@ -17,7 +17,7 @@ export class Game
     private objLoader: ModelLoader;
 
     //Time properties
-    private currentTimeValue = 0;
+    private currentTimeValue = { value: 0 }; //We need this format if we want to pass the time more easily to shaders (won't have to update shaders them every frame)
     private deltaTimeValue = 0;
     private previousTime = 0;
 
@@ -86,7 +86,8 @@ export class Game
     }
 
     //Getters for different properties that other scripts would need
-    public get currentTime(): number                { return this.currentTimeValue; }
+    public get currentTime(): number                { return this.currentTimeValue.value; }
+    public get currentTimeUniform()                 { return this.currentTimeValue; }
     public get deltaTime(): number                  { return this.deltaTimeValue; }
     public get textureLoader(): TextureLoader       { return this.texLoader; }
     public get modelLoader(): ModelLoader           { return this.objLoader; }
@@ -144,9 +145,9 @@ export class Game
      */
     private readonly update = (timestamp: number): void =>
     {
-        this.currentTimeValue = timestamp / 1000;
-        this.deltaTimeValue = this.currentTimeValue - this.previousTime;
-        this.previousTime = this.currentTimeValue;
+        this.currentTimeValue.value = timestamp / 1000;
+        this.deltaTimeValue = this.currentTimeValue.value - this.previousTime;
+        this.previousTime = this.currentTimeValue.value;
 
         for (const updatable of this.updatables)
         {
