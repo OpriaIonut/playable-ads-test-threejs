@@ -1,5 +1,5 @@
 import { BufferGeometry, Color, Material, MeshStandardMaterial, Object3D, Texture } from "three";
-import type { IVisuals } from "../../interfaces";
+import type { IThreadmillTile, IVisuals } from "../../interfaces";
 import { BulletVisuals } from "../visuals/BulletVisuals";
 import { PixelFlowThreadmillVisuals } from "../visuals/pixelFlow/PixelFlowThreadmillVisuals";
 import { PixelFlowReserveVisuals } from "../visuals/pixelFlow/PixelFlowReserveVisuals";
@@ -9,6 +9,8 @@ import { FishFortuneThreadmillVisuals } from "../visuals/fishFortune/FishFortune
 import { WaterMaterial } from "../shaders/WaterMaterial";
 import { FishFortuneReserveVisuals } from "../visuals/fishFortune/FishFortuneReserveVisuals";
 import { PenguinTurretVisuals } from "../visuals/fishFortune/PenguinTurretVisuals";
+import { PixelFlowThreadmillTileVisuals } from "../visuals/pixelFlow/PixelFlowThreadmillTileVisuals";
+import { FishFortuneWaterCurl } from "../visuals/fishFortune/FishFortuneWaterCurl";
 
 export enum GameThemes {
     PixelFlow,
@@ -68,6 +70,24 @@ export class ThemeFactory
             case GameThemes.PixelFlow:
             default:
                 visuals = new PixelFlowThreadmillVisuals();
+                break;
+        }
+        if(autoInitialize)
+            visuals.initialize();
+        return visuals;
+    }
+
+    public getThreadmillTileVisuals(autoInitialize: boolean): IThreadmillTile
+    {
+        let visuals: IThreadmillTile;
+        switch(this.currentTheme)
+        {
+            case GameThemes.FishOfFortune:
+                visuals = new FishFortuneWaterCurl();
+                break;
+            case GameThemes.PixelFlow:
+            default:
+                visuals = new PixelFlowThreadmillTileVisuals();
                 break;
         }
         if(autoInitialize)

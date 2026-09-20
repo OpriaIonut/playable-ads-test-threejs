@@ -1,4 +1,4 @@
-import type { Color, Object3D } from "three";
+import type { Color, Euler, Object3D, Vector3 } from "three";
 
 /**
  * Main interface which allows scripts to be called every frame in the update loop. To use, implement it in a class and call game.addUpdatable(class)
@@ -26,4 +26,9 @@ export interface IVisuals
 export interface ITurretVisuals extends IVisuals
 {
     colorTurret(color: Color): void;
+}
+
+export interface IThreadmillTile extends IVisuals
+{
+    moveTo(target: Vector3, targetRot: Euler): void;
 }

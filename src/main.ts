@@ -1,5 +1,5 @@
 import './style.css'
-import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, Vector2, Vector3 } from 'three'
+import { AmbientLight, Box3, DirectionalLight, HemisphereLight, Mesh, Object3D, PlaneGeometry, Vector2, Vector3 } from 'three'
 import { Game } from './scripts/managers/Game'
 import { TileManager } from './scripts/managers/TileManager'
 import { Threadmill } from './scripts/entities/Threadmill'

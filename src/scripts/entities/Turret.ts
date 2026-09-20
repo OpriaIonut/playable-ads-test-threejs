@@ -1,13 +1,15 @@
 import { Color, Euler, Vector3, type Object3D } from "three";
-import type { ITurretVisuals, IUpdatable, IVisuals } from "../../interfaces";
+import type { IThreadmillTile, ITurretVisuals, IUpdatable, IVisuals } from "../../interfaces";
 import { game, themeFactory } from "../../main";
 import type { Tile, TileManager } from "../managers/TileManager";
 import { Bullet } from "./Bullet";
+import type { Threadmill } from "./Threadmill";
 
 export class Turret implements IUpdatable
 {
     private visuals: IVisuals;
     private tileManager: TileManager;
+    private threadmill: Threadmill;
     private bulletsRemaining: number;   //How many bullets we can still fire. Turret will be destroyed after it runs out of bullets
     private color: Color;               //Color of the turret, can shoot tiles with the exact same color
 
@@ -31,6 +33,9 @@ export class Turret implements IUpdatable
     private rotationOffset: Euler = new Euler(); //On threadmill, will rotate towards movement direction, but after shooting once, we want to rotate it towards the tiles. This offset is used for that
     private shootOffset: Vector3 = new Vector3(0.0, 0.0, -0.2); //Controls how far away the bullets should spawn from the turret (in local space)
 
+    private threadmillTile?: IThreadmillTile;
+    private threadmillTileRot: Euler = new Euler();
+
     //Auxiliary variables to help with calculations
     private moveDir = new Vector3();
     private aux = new Vector3();
@@ -44,10 +49,11 @@ export class Turret implements IUpdatable
      * @param bullets How many bullets it can fire
      * @param tileManager Reference to the TileManager to be able to detect tiles that it can shoot
      */
-    constructor(pos: Vector3, color: Color, bullets: number, tileManager: TileManager)
+    constructor(pos: Vector3, color: Color, bullets: number, tileManager: TileManager, threadmill: Threadmill)
     {
         this.bulletsRemaining = bullets;
         this.tileManager = tileManager;
+        this.threadmill = threadmill;
         this.color = color;
 
         //Initialize the 3D object
@@ -128,6 +134,13 @@ export class Turret implements IUpdatable
         this.canShoot = false;
         this.visuals.gfx.rotation.set(0, 0, 0);
         this.rotationOffset.set(0.0, 0.0, 0.0);
+
+        if(this.threadmillTile)
+        {
+            this.threadmill.returnTile(this.threadmillTile);
+            this.threadmillTile = undefined;
+        }
+
         if(this.onThreadmillEndReached != undefined)
             this.onThreadmillEndReached(this);
     }
@@ -149,6 +162,12 @@ export class Turret implements IUpdatable
     {
         if(this.onTurretDestroyed)
             this.onTurretDestroyed(this);
+
+        if(this.threadmillTile)
+        {
+            this.threadmill.returnTile(this.threadmillTile);
+            this.threadmillTile = undefined;
+        }
 
         game.removeUpdatable(this);
         game.removeObject(this.visuals.gfx);
@@ -186,6 +205,13 @@ export class Turret implements IUpdatable
             this.visuals.gfx.lookAt(this.aux);
         }
         this.visuals.gfx.position.add(this.moveDir);
+        
+        if(this.threadmillTile)
+        {
+            this.threadmillTile.gfx.position.copy(this.visuals.gfx.position);
+            this.threadmillTile.gfx.rotation.copy(this.threadmillTileRot);
+            // .moveTo(this.visuals.gfx.position, this.threadmillTileRot);
+        }
 
         //Update counter position to follow the turret
         this.updateCounter();
@@ -200,9 +226,14 @@ export class Turret implements IUpdatable
             }
             else
             {
+                if(this.threadmillIndex == 0)
+                {
+                    this.canShoot = true; //Will enable shooting after reaching threadmill index 0 position
+                    this.threadmillTile = this.threadmill.getThreadmillTile();
+                }
+
                 //If we are moving on the threadmill, start moving towards the next point along the path and detect when we reach the end
                 this.threadmillIndex++;
-                this.canShoot = true; //Will enable shooting after reaching threadmill index 0 position
                 if(this.threadmillIndex >= this.threadmillPoints.length)
                     this.stopThreadmillMovement();
             }

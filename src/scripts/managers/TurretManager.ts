@@ -21,8 +21,6 @@ export class TurretManager
 
     private zPadding = 0.4;             //Space to apply for new rows of turrets in the grid on the bottom of the screen
     private bulletsPerTurret = 20;      //How many bullets a turret can shoot
-    private threadmillLimit = 5;        //How many turrets can at the same time on the threadmill
-    private turretsOnThreadmill = 0;    //Current number of turrets on the threadmill
 
     //First row to spawn turrets in. Additional rows of turrets turrets will be spawned behind those points, by using the zPadding property
     private turretSpawnPoints: Vector3[] = [
@@ -44,12 +42,6 @@ export class TurretManager
     private availableTurrets: Turret[][] = []; //Holds turrets per column in the lower part of the screen (ex: [column][row])
     private threadmillPositions: Vector3[] = []; //Caching positions along the threadmill to pass into each turret object
 
-    private aux: Vector3 = new Vector3();
-
-    //UI element to tell the user how many turrets can be on the threadmill
-    private threadmillCounterWorldPos: Vector3 = new Vector3(-1.5, 0, 0.75);
-    private threadmillCounter: HTMLDivElement;
-
     private hasGameEnded: boolean = false;
     private endGameText: HTMLDivElement;    //Text displayed once the player wins/loses the game
 
@@ -70,14 +62,9 @@ export class TurretManager
 
         //Initialize event listeners
         game.canvasElement.addEventListener('pointerdown', this.onPointerDown);
-        game.addListener_onWindowResized(() => { this.updateCounter(); });
+        game.addListener_onWindowResized(() => { this.threadmill.updateThreadmillCounter(); });
 
         this.tiles.addListener_onAllTilesDestroyed(() => { this.endGame(true); });
-
-        //Initialize ui elements
-        this.threadmillCounter = document.createElement("div");
-        this.threadmillCounter.className = "counter";
-        document.body.appendChild(this.threadmillCounter);
 
         this.endGameText = document.createElement("div");
         this.endGameText.id = "endGameText";
@@ -91,7 +78,7 @@ export class TurretManager
      */
     public spawnTurrets()
     {
-        this.updateCounter();
+        this.threadmill.updateThreadmillCounter();
 
         //Make a list of how many turrets we need to spawn of each color, and shuffle it to be in random order
         let colorsToSpawn: Color[] = [];
@@ -118,9 +105,9 @@ export class TurretManager
             let pos = this.turretSpawnPoints[spawnPointIndex].clone();
             pos.z += this.zPadding * row;
 
-            let turret = new Turret(pos, colorsToSpawn[turretIndex], this.bulletsPerTurret, this.tiles);
+            let turret = new Turret(pos, colorsToSpawn[turretIndex], this.bulletsPerTurret, this.tiles, this.threadmill);
             turret.setLocationProperties(-1, spawnPointIndex, row); //Tell the turret where it currently sits (helps with later calculations)
-            turret.addListener_onTurretDestroyed(() => { this.turretsOnThreadmill--; this.updateCounter(); });
+            turret.addListener_onTurretDestroyed(() => { this.threadmill.decrementNumTurretsOnThreadmill(); this.threadmill.updateThreadmillCounter(); });
             this.availableTurrets[spawnPointIndex].push(turret);
 
             //We spawn the turrets per row, so increase the row once we reach the last spawn point
@@ -156,11 +143,11 @@ export class TurretManager
     private onValidTurretClicked(turret: Turret)
     {
         //If we reached our limit, don't do anything
-        if(this.turretsOnThreadmill >= this.threadmillLimit)
+        if(this.threadmill.getNumTurretsOnThreadmill() >= this.threadmill.getThreadmillLimit())
             return;
 
-        this.turretsOnThreadmill++;
-        this.updateCounter();
+        this.threadmill.incrementNumTurretsOnThreadmill();
+        this.threadmill.updateThreadmillCounter();
 
         //Remove the turret from where it was previously
         let reserveIndex = turret.getReserveIndex();
@@ -195,24 +182,13 @@ export class TurretManager
                 turret.moveToSpecificTarget(this.turretReserve[index].pos);
                 this.turretReserve[index].heldTurret = turret;
 
-                this.turretsOnThreadmill--;
-                this.updateCounter();
+                this.threadmill.decrementNumTurretsOnThreadmill();
+                this.threadmill.updateThreadmillCounter();
                 return;
             }
         }
         //If all reserves were full, trigger game over
         this.endGame(false);
-    }
-
-    /**
-     * Update the threadmill counter position
-     */
-    private updateCounter()
-    {
-        this.threadmillCounter.innerHTML = `${this.threadmillLimit - this.turretsOnThreadmill} / ${this.threadmillLimit}`;
-        this.aux.copy(this.threadmillCounterWorldPos).project(game.cameraObject);
-        this.threadmillCounter.style.left = `${(this.aux.x + 1) / 2 * window.innerWidth}px`;
-        this.threadmillCounter.style.top = `${-(this.aux.y - 1) / 2 * window.innerHeight}px`;
     }
 
     /**
