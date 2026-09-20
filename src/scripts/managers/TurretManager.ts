@@ -1,9 +1,9 @@
-import { Color, Mesh, MeshStandardMaterial, Object3D, Raycaster, Vector2, Vector3 } from "three";
+import { Color, Object3D, Raycaster, Vector2, Vector3 } from "three";
 import type { TileManager } from "./TileManager";
-import { game } from "../../main";
+import { game, themeFactory } from "../../main";
 import { Turret } from "../entities/Turret";
-import { RoundedBoxGeometry } from "three/examples/jsm/Addons.js";
 import type { Threadmill } from "../entities/Threadmill";
+import type { Visuals } from "../../interfaces";
 
 declare type TurretReserve = {
     pos: Vector3,
@@ -39,6 +39,8 @@ export class TurretManager
         { pos: new Vector3(0.4, 0, 1), heldTurret: undefined },
         { pos: new Vector3(0.8, 0, 1), heldTurret: undefined },
     ];
+    private reserveVisuals: Visuals[] = [];
+
     private availableTurrets: Turret[][] = []; //Holds turrets per column in the lower part of the screen (ex: [column][row])
     private threadmillPositions: Vector3[] = []; //Caching positions along the threadmill to pass into each turret object
 
@@ -141,10 +143,9 @@ export class TurretManager
      */
     private spawnTurretReserve(pos: Vector3)
     {
-        let sphere = new Mesh(new RoundedBoxGeometry(1, 1, 1, 2, 0.25), new MeshStandardMaterial({ color: '#31334e' }));
-        sphere.position.copy(pos);
-        sphere.scale.set(0.35, 0.1, 0.35);
-        game.addObject(sphere);
+        let visuals = themeFactory.getReserveVisuals(true);
+        visuals.gfx.position.copy(pos);
+        this.reserveVisuals.push(visuals);
     }
 
     /**

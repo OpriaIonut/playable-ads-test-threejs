@@ -2,6 +2,7 @@ import { BufferGeometry, Material, Object3D, Texture } from "three";
 import type { Visuals } from "../../interfaces";
 import { BulletVisuals } from "../visuals/BulletVisuals";
 import { ThreadmillVisuals } from "../visuals/ThreadmillVisuals";
+import { PixelFlowReserveVisuals } from "../visuals/PixelFlowReserveVisuals";
 
 export enum GameThemes {
     PixelFlow,
@@ -39,10 +40,26 @@ export class ThemeFactory
                 visuals = new ThreadmillVisuals();
                 break;
             case GameThemes.PixelFlow:
-                visuals = new ThreadmillVisuals();
-                break;
             default:
                 visuals = new ThreadmillVisuals();
+                break;
+        }
+        if(autoInitialize)
+            visuals.initialize();
+        return visuals;
+    }
+    
+    public getReserveVisuals(autoInitialize: boolean): Visuals
+    {
+        let visuals: Visuals;
+        switch(this.currentTheme)
+        {
+            case GameThemes.FishOfFortune:
+                visuals = new PixelFlowReserveVisuals();
+                break;
+            case GameThemes.PixelFlow:
+            default:
+                visuals = new PixelFlowReserveVisuals();
                 break;
         }
         if(autoInitialize)

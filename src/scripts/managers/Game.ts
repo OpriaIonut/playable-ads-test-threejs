@@ -1,6 +1,6 @@
 import { Color, Object3D, PerspectiveCamera, WebGLRenderer, Scene, Vector3, TextureLoader } from 'three'
 import type { IUpdatable } from '../../interfaces'
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { ModelLoader } from './ModelLoader';
 
 export class Game
 {
@@ -14,7 +14,7 @@ export class Game
     private animationFrameId: number | undefined;       //Can be used to stop the game loop
     
     private texLoader: TextureLoader;   //Main loader for all textures in the codebase
-    private objLoader: GLTFLoader;
+    private objLoader: ModelLoader;
 
     //Time properties
     private currentTimeValue = 0;
@@ -37,7 +37,7 @@ export class Game
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
         this.texLoader = new TextureLoader();
-        this.objLoader = new GLTFLoader();
+        this.objLoader = new ModelLoader();
 
         window.addEventListener('resize', this.resize);
         this.resize();
@@ -89,7 +89,7 @@ export class Game
     public get currentTime(): number                { return this.currentTimeValue; }
     public get deltaTime(): number                  { return this.deltaTimeValue; }
     public get textureLoader(): TextureLoader       { return this.texLoader; }
-    public get objectLoader(): GLTFLoader           { return this.objLoader; }
+    public get modelLoader(): ModelLoader           { return this.objLoader; }
     public get cameraObject(): PerspectiveCamera    { return this.camera; }
     public get canvasElement(): HTMLCanvasElement   { return this.renderer.domElement; }
 
