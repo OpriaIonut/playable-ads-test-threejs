@@ -4,6 +4,7 @@ import { BulletVisuals } from "../visuals/BulletVisuals";
 import { ThreadmillVisuals } from "../visuals/ThreadmillVisuals";
 import { PixelFlowReserveVisuals } from "../visuals/PixelFlowReserveVisuals";
 import { PigTurretVisuals } from "../visuals/PigTurretVisuals";
+import { TapVisuals } from "../visuals/TapVisuals";
 
 export enum GameThemes {
     PixelFlow,
@@ -27,6 +28,14 @@ export class ThemeFactory
     {
         //Bullets won't be different per theme, so we can simply construct their visuals
         let visuals: IVisuals = new BulletVisuals();
+        if(autoInitialize)
+            visuals.initialize();
+        return visuals;
+    }
+    public getTapVisuals(autoInitialize: boolean): IVisuals
+    {
+        //Taps won't be different per theme, so we can simply construct their visuals
+        let visuals: IVisuals = new TapVisuals();
         if(autoInitialize)
             visuals.initialize();
         return visuals;

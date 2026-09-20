@@ -240,6 +240,12 @@ export class TurretManager
         this.pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
         this.raycaster.setFromCamera(this.pointer, game.cameraObject);
 
+        let tapVFX = themeFactory.getTapVisuals(true);
+        this.raycaster.ray.at(10, tapVFX.gfx.position);
+        setTimeout(() => {
+            tapVFX.dispose();
+        }, 250);
+
         //Create the list of turrets that we can raycast to
         const turrets: Turret[] = this.getTurretRaycastTargets();
         const raycastTargets = turrets.map(turret => turret.getObject3D());
