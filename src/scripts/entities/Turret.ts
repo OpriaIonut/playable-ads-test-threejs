@@ -1,13 +1,12 @@
-import { Color, Euler, Material, Mesh, MeshStandardMaterial, Vector3, type Object3D } from "three";
-import type { IUpdatable } from "../../interfaces";
-import { RoundedBoxGeometry } from "three/examples/jsm/Addons.js";
-import { game } from "../../main";
+import { Color, Euler, Vector3, type Object3D } from "three";
+import type { ITurretVisuals, IUpdatable, IVisuals } from "../../interfaces";
+import { game, themeFactory } from "../../main";
 import type { Tile, TileManager } from "../managers/TileManager";
 import { Bullet } from "./Bullet";
 
 export class Turret implements IUpdatable
 {
-    private obj: Mesh;
+    private visuals: IVisuals;
     private tileManager: TileManager;
     private bulletsRemaining: number;   //How many bullets we can still fire. Turret will be destroyed after it runs out of bullets
     private color: Color;               //Color of the turret, can shoot tiles with the exact same color
@@ -30,7 +29,7 @@ export class Turret implements IUpdatable
     private lastShootTarget: Tile | undefined;  //We will only shoot bullets when the target changes and the new target is valid
     private canShoot: boolean = false;          //Will be set to true when we reach the first point on the threadmill (to not shoot while flying towards the threadmill)
     private rotationOffset: Euler = new Euler(); //On threadmill, will rotate towards movement direction, but after shooting once, we want to rotate it towards the tiles. This offset is used for that
-    private shootOffset: Vector3 = new Vector3(0.0, 0.0, 0.2); //Controls how far away the bullets should spawn from the turret (in local space)
+    private shootOffset: Vector3 = new Vector3(0.0, 0.0, -0.2); //Controls how far away the bullets should spawn from the turret (in local space)
 
     //Auxiliary variables to help with calculations
     private moveDir = new Vector3();
@@ -52,10 +51,12 @@ export class Turret implements IUpdatable
         this.color = color;
 
         //Initialize the 3D object
-        this.obj = new Mesh(new RoundedBoxGeometry(1, 1, 1.25, 1, 0.25), new MeshStandardMaterial({ color: color.getStyle() }));
-        this.obj.position.copy(pos);
-        this.obj.scale.setScalar(0.25);
-        game.addObject(this.obj);
+        this.visuals = themeFactory.getTurretVisuals(true);
+        this.visuals.gfx.position.copy(pos);
+        this.visuals.gfx.scale.setScalar(0.25);
+        this.visuals.addListener_onVisualsInitialized(() => {
+            (this.visuals as ITurretVisuals).colorTurret(color);
+        });
         game.addUpdatable(this);
 
         //UI counter to notify the user how many bullets he has
@@ -86,7 +87,7 @@ export class Turret implements IUpdatable
     }
 
     //Getters for turret properties
-    public getObject3D(): Object3D { return this.obj; }
+    public getObject3D(): Object3D { return this.visuals.gfx; }
     public getReserveIndex(): number { return this.reserveIndex; }
     public getColumn(): number { return this.column; }
     public getRow(): number { return this.row; }
@@ -125,7 +126,7 @@ export class Turret implements IUpdatable
     {
         this.isOnThreadmill = false;
         this.canShoot = false;
-        this.obj.rotation.set(0, 0, 0);
+        this.visuals.gfx.rotation.set(0, 0, 0);
         this.rotationOffset.set(0.0, 0.0, 0.0);
         if(this.onThreadmillEndReached != undefined)
             this.onThreadmillEndReached(this);
@@ -150,10 +151,8 @@ export class Turret implements IUpdatable
             this.onTurretDestroyed(this);
 
         game.removeUpdatable(this);
-        game.removeObject(this.obj);
-        this.obj.geometry.dispose();
-        (this.obj.material as Material).dispose();
-        this.obj.dispose();
+        game.removeObject(this.visuals.gfx);
+        this.visuals.dispose();
         document.body.removeChild(this.bulletCounter);
     }
 
@@ -178,23 +177,23 @@ export class Turret implements IUpdatable
             target = this.specificTargetPos;
 
         //Calculate movement direction and move towards it
-        this.moveDir.copy(target).sub(this.obj.position).normalize();
+        this.moveDir.copy(target).sub(this.visuals.gfx.position).normalize();
         this.moveDir.multiplyScalar(this.movementSpeed * game.deltaTime);
 
         if(this.canShoot)
         {
-            this.aux.copy(this.moveDir).applyEuler(this.rotationOffset).add(this.obj.position);
-            this.obj.lookAt(this.aux);
+            this.aux.copy(this.moveDir).multiplyScalar(-1).applyEuler(this.rotationOffset).add(this.visuals.gfx.position);
+            this.visuals.gfx.lookAt(this.aux);
         }
-        this.obj.position.add(this.moveDir);
+        this.visuals.gfx.position.add(this.moveDir);
 
         //Update counter position to follow the turret
         this.updateCounter();
 
         //Check if we reached the target
-        if(target.distanceToSquared(this.obj.position) < 0.001)
+        if(target.distanceToSquared(this.visuals.gfx.position) < 0.001)
         {
-            this.obj.position.copy(target);
+            this.visuals.gfx.position.copy(target);
             if(this.isMovingToSpecificTarget)
             {
                 this.isMovingToSpecificTarget = false;
@@ -215,7 +214,7 @@ export class Turret implements IUpdatable
      */
     private tryShoot()
     {
-        let target = this.tileManager.getClosestTile(this.obj.position);
+        let target = this.tileManager.getClosestTile(this.visuals.gfx.position);
         if(target != this.lastShootTarget)
         {
             if(target != undefined && target.wasShot == false && target.color.getStyle() == this.color.getStyle())
@@ -229,7 +228,7 @@ export class Turret implements IUpdatable
      */
     private updateCounter()
     {
-        this.aux.copy(this.obj.position).project(game.cameraObject);
+        this.aux.copy(this.visuals.gfx.position).project(game.cameraObject);
         this.bulletCounter.style.left = `${(this.aux.x + 1) / 2 * window.innerWidth}px`;
         this.bulletCounter.style.top = `${-(this.aux.y - 1) / 2 * window.innerHeight}px`;
         this.bulletCounter.innerHTML = "" + this.bulletsRemaining;
@@ -242,10 +241,9 @@ export class Turret implements IUpdatable
     {
         this.rotationOffset.set(0.0, Math.PI * 0.5, 0.0);
         this.tileManager.markTileAsShot(target); //Mark the tile as shot to not allow other turrets to also shoot it (would make the game impossible to win)
-        this.obj.lookAt(target.mesh.position);
 
         //Create the bullet and give it a callback for what should happen when it reaches the destination (in this case, destroy the bullet and the tile)
-        this.aux.copy(this.shootOffset).applyEuler(this.obj.rotation).add(this.obj.position);
+        this.aux.copy(this.shootOffset).applyEuler(this.visuals.gfx.rotation).add(this.visuals.gfx.position);
         const bullet = new Bullet(this.aux, target.mesh.position, () => {
             bullet.destroy();
             this.tileManager.destroyTile(target);

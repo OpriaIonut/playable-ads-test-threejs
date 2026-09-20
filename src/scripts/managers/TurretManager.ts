@@ -3,7 +3,7 @@ import type { TileManager } from "./TileManager";
 import { game, themeFactory } from "../../main";
 import { Turret } from "../entities/Turret";
 import type { Threadmill } from "../entities/Threadmill";
-import type { Visuals } from "../../interfaces";
+import type { IVisuals } from "../../interfaces";
 
 declare type TurretReserve = {
     pos: Vector3,
@@ -39,7 +39,7 @@ export class TurretManager
         { pos: new Vector3(0.4, 0, 1), heldTurret: undefined },
         { pos: new Vector3(0.8, 0, 1), heldTurret: undefined },
     ];
-    private reserveVisuals: Visuals[] = [];
+    private reserveVisuals: IVisuals[] = [];
 
     private availableTurrets: Turret[][] = []; //Holds turrets per column in the lower part of the screen (ex: [column][row])
     private threadmillPositions: Vector3[] = []; //Caching positions along the threadmill to pass into each turret object
@@ -244,7 +244,7 @@ export class TurretManager
         const turrets: Turret[] = this.getTurretRaycastTargets();
         const raycastTargets = turrets.map(turret => turret.getObject3D());
 
-        const intersections = this.raycaster.intersectObjects(raycastTargets, false);
+        const intersections = this.raycaster.intersectObjects(raycastTargets, true);
         const hitObject = intersections[0]?.object;
         if (!hitObject)
             return;
@@ -281,7 +281,14 @@ export class TurretManager
     {        
         for(let index = 0; index < turrets.length; ++index)
         {
-            if(turrets[index].getObject3D() == hitObj)
+            const turretObject = turrets[index].getObject3D();
+            let hitParent: Object3D | null = hitObj;
+            while(hitParent != null && hitParent != turretObject)
+            {
+                hitParent = hitParent.parent;
+            }
+
+            if(hitParent == turretObject)
             {
                 let reserveIndex = turrets[index].getReserveIndex();
                 if(reserveIndex >= 0 && reserveIndex < this.turretReserve.length)

@@ -1,10 +1,10 @@
 import { BufferGeometry, CatmullRomCurve3, Line, LineBasicMaterial, Vector3 } from "three";
 import { game, themeFactory } from "../../main";
-import type { Visuals } from "../../interfaces";
+import type { IVisuals } from "../../interfaces";
 
 export class Threadmill
 {
-    private visuals: Visuals;
+    private visuals: IVisuals;
     private debugPath: boolean = false;
 
     private curve: CatmullRomCurve3; //Main curve for the turrets to follow

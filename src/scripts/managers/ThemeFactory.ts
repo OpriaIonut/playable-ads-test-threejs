@@ -1,8 +1,9 @@
 import { BufferGeometry, Material, Object3D, Texture } from "three";
-import type { Visuals } from "../../interfaces";
+import type { IVisuals } from "../../interfaces";
 import { BulletVisuals } from "../visuals/BulletVisuals";
 import { ThreadmillVisuals } from "../visuals/ThreadmillVisuals";
 import { PixelFlowReserveVisuals } from "../visuals/PixelFlowReserveVisuals";
+import { PigTurretVisuals } from "../visuals/PigTurretVisuals";
 
 export enum GameThemes {
     PixelFlow,
@@ -22,23 +23,20 @@ export class ThemeFactory
         this.currentTheme = theme;
     }
 
-    public getBulletVisuals(autoInitialize: boolean): Visuals
+    public getBulletVisuals(autoInitialize: boolean): IVisuals
     {
         //Bullets won't be different per theme, so we can simply construct their visuals
-        let visuals: Visuals = new BulletVisuals();
+        let visuals: IVisuals = new BulletVisuals();
         if(autoInitialize)
             visuals.initialize();
         return visuals;
     }
 
-    public getThreadmillVisuals(autoInitialize: boolean): Visuals
+    public getThreadmillVisuals(autoInitialize: boolean): IVisuals
     {
-        let visuals: Visuals;
+        let visuals: IVisuals;
         switch(this.currentTheme)
         {
-            case GameThemes.FishOfFortune:
-                visuals = new ThreadmillVisuals();
-                break;
             case GameThemes.PixelFlow:
             default:
                 visuals = new ThreadmillVisuals();
@@ -49,17 +47,29 @@ export class ThemeFactory
         return visuals;
     }
     
-    public getReserveVisuals(autoInitialize: boolean): Visuals
+    public getReserveVisuals(autoInitialize: boolean): IVisuals
     {
-        let visuals: Visuals;
+        let visuals: IVisuals;
         switch(this.currentTheme)
         {
-            case GameThemes.FishOfFortune:
-                visuals = new PixelFlowReserveVisuals();
-                break;
             case GameThemes.PixelFlow:
             default:
                 visuals = new PixelFlowReserveVisuals();
+                break;
+        }
+        if(autoInitialize)
+            visuals.initialize();
+        return visuals;
+    }
+
+    public getTurretVisuals(autoInitialize: boolean): IVisuals
+    {
+        let visuals: IVisuals;
+        switch(this.currentTheme)
+        {
+            case GameThemes.PixelFlow:
+            default:
+                visuals = new PigTurretVisuals();
                 break;
         }
         if(autoInitialize)
