@@ -3,7 +3,7 @@ import type { TileManager } from "./TileManager";
 import { game, themeFactory } from "../../main";
 import { Turret } from "../entities/Turret";
 import type { Threadmill } from "../entities/Threadmill";
-import type { IVisuals } from "../../interfaces";
+import type { Visuals } from "../abstractClasses/Visuals";
 
 declare type TurretReserve = {
     pos: Vector3,
@@ -37,7 +37,7 @@ export class TurretManager
         { pos: new Vector3(0.4, 0, 1), heldTurret: undefined },
         { pos: new Vector3(0.8, 0, 1), heldTurret: undefined },
     ];
-    private reserveVisuals: IVisuals[] = [];
+    private reserveVisuals: Visuals[] = [];
 
     private availableTurrets: Turret[][] = []; //Holds turrets per column in the lower part of the screen (ex: [column][row])
     private threadmillPositions: Vector3[] = []; //Caching positions along the threadmill to pass into each turret object

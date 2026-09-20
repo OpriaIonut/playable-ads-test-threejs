@@ -1,10 +1,11 @@
 import { Vector3 } from "three";
-import type { IUpdatable, IVisuals } from "../../interfaces";
+import type { IUpdatable } from "../../interfaces";
 import { game, themeFactory } from "../../main";
+import type { Visuals } from "../abstractClasses/Visuals";
 
 export class Bullet implements IUpdatable
 {
-    private visuals: IVisuals;
+    private visuals: Visuals;
 
     private moveSpeed = 2.5;
     private endPos: Vector3;

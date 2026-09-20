@@ -1,13 +1,16 @@
 import { Color, Euler, Vector3, type Object3D } from "three";
-import type { IThreadmillTile, ITurretVisuals, IUpdatable, IVisuals } from "../../interfaces";
+import type { IUpdatable } from "../../interfaces";
 import { game, themeFactory } from "../../main";
 import type { Tile, TileManager } from "../managers/TileManager";
 import { Bullet } from "./Bullet";
 import type { Threadmill } from "./Threadmill";
+import type { Visuals } from "../abstractClasses/Visuals";
+import type { ThreadmillTileVisuals } from "../abstractClasses/ThreadmillTile";
+import type { TurretVisuals } from "../abstractClasses/TurretVisuals";
 
 export class Turret implements IUpdatable
 {
-    private visuals: IVisuals;
+    private visuals: Visuals;
     private tileManager: TileManager;
     private threadmill: Threadmill;
     private bulletsRemaining: number;   //How many bullets we can still fire. Turret will be destroyed after it runs out of bullets
@@ -33,7 +36,7 @@ export class Turret implements IUpdatable
     private rotationOffset: Euler = new Euler(); //On threadmill, will rotate towards movement direction, but after shooting once, we want to rotate it towards the tiles. This offset is used for that
     private shootOffset: Vector3 = new Vector3(0.0, 0.0, -0.2); //Controls how far away the bullets should spawn from the turret (in local space)
 
-    private threadmillTile?: IThreadmillTile;
+    private threadmillTile?: ThreadmillTileVisuals;
     private threadmillTileRot: Euler = new Euler();
 
     //Auxiliary variables to help with calculations
@@ -61,7 +64,7 @@ export class Turret implements IUpdatable
         this.visuals.gfx.position.copy(pos);
         this.visuals.gfx.scale.setScalar(0.25);
         this.visuals.addListener_onVisualsInitialized(() => {
-            (this.visuals as ITurretVisuals).colorTurret(color);
+            (this.visuals as TurretVisuals).colorTurret(color);
         });
         game.addUpdatable(this);
 

@@ -1,14 +1,8 @@
-import { Object3D } from "three";
-import type { IVisuals } from "../../../interfaces";
-import { game, themeFactory } from "../../../main";
+import { game } from "../../../main";
+import { Visuals } from "../../abstractClasses/Visuals";
 
-export class FishFortuneReserveVisuals implements IVisuals
+export class FishFortuneReserveVisuals extends Visuals
 {
-    public readonly gfx: Object3D = new Object3D();
-    private initialized: boolean = false;
-
-    private onVisualsInitializedListeners = new Set<() => void>();
-
     public initialize(): void
     {
         game.modelLoader.load("meshes/fishFortune/reserve.glb", (data) => {
@@ -18,33 +12,5 @@ export class FishFortuneReserveVisuals implements IVisuals
             this.onInitialized();
         });
         game.addObject(this.gfx);
-    }
-    public dispose(): void
-    {
-        game.removeObject(this.gfx);
-        themeFactory.destroy(this.gfx, true, true, true);
-    }
-
-    public isInitialized(): boolean { return this.initialized;  }
-    
-    public addListener_onVisualsInitialized(callback: () => void): void
-    {
-        if(this.initialized)
-            callback();
-        else
-            this.onVisualsInitializedListeners.add(callback);
-    }
-    public removeListener_onVisualsInitialized(callback: () => void): void
-    {
-        this.onVisualsInitializedListeners.delete(callback);
-    }
-
-    private onInitialized()
-    {
-        this.initialized = true;
-        for (const listener of this.onVisualsInitializedListeners)
-        {
-            listener();
-        }
     }
 }

@@ -1,15 +1,11 @@
-import { Material, Mesh, Object3D, Texture } from "three";
-import type { IVisuals } from "../../../interfaces";
-import { game, outlinedObjects, themeFactory } from "../../../main";
+import { Material, Mesh, Texture } from "three";
+import { game, outlinedObjects } from "../../../main";
 import { MovingThreadmillMaterial } from "../../shaders/MovingThreadmillMaterial";
+import { Visuals } from "../../abstractClasses/Visuals";
 
-export class PixelFlowThreadmillVisuals implements IVisuals
+export class PixelFlowThreadmillVisuals extends Visuals
 {
-    public readonly gfx: Object3D = new Object3D();
-    private initialized: boolean = false;
     private meshesLoaded: number = 0;
-    private onVisualsInitializedListeners = new Set<() => void>();
-
     private threadmillTexture?: Texture;
 
     public initialize(): void
@@ -51,32 +47,5 @@ export class PixelFlowThreadmillVisuals implements IVisuals
                 this.onInitialized();
         });
         game.addObject(this.gfx);
-    }
-
-    public dispose(): void
-    {
-        game.removeObject(this.gfx);
-        themeFactory.destroy(this.gfx, true, true, true);
-    }
-    public isInitialized(): boolean { return this.initialized;  }
-    public addListener_onVisualsInitialized(callback: () => void): void
-    {
-        if(this.initialized)
-            callback();
-        else
-            this.onVisualsInitializedListeners.add(callback);
-    }
-    public removeListener_onVisualsInitialized(callback: () => void): void
-    {
-        this.onVisualsInitializedListeners.delete(callback);
-    }
-
-    private onInitialized()
-    {
-        this.initialized = true;
-        for (const listener of this.onVisualsInitializedListeners)
-        {
-            listener();
-        }
     }
 }

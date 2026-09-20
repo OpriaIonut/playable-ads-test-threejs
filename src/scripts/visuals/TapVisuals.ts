@@ -1,13 +1,10 @@
-import { Mesh, MeshStandardMaterial, Object3D, RingGeometry } from "three";
-import type { IUpdatable, IVisuals } from "../../interfaces";
+import { Mesh, MeshStandardMaterial, RingGeometry } from "three";
+import type { IUpdatable } from "../../interfaces";
 import { game, themeFactory } from "../../main";
+import { Visuals } from "../abstractClasses/Visuals";
 
-export class TapVisuals implements IVisuals, IUpdatable
+export class TapVisuals extends Visuals implements IUpdatable
 {
-    public readonly gfx: Object3D = new Object3D();
-    private initialized = false;
-    private onVisualsInitializedListeners = new Set<() => void>();
-
     private mat!: MeshStandardMaterial;
 
     public start(): void
@@ -36,29 +33,5 @@ export class TapVisuals implements IVisuals, IUpdatable
         game.removeObject(this.gfx);
         game.removeUpdatable(this);
         themeFactory.destroy(this.gfx);
-    }
-    public isInitialized(): boolean
-    {
-        return this.initialized;
-    }
-    public addListener_onVisualsInitialized(callback: () => void): void
-    {
-        if(this.initialized)
-            callback();
-        else
-            this.onVisualsInitializedListeners.add(callback);
-    }
-    public removeListener_onVisualsInitialized(callback: () => void): void
-    {
-        this.onVisualsInitializedListeners.delete(callback);
-    }
-
-    private onInitialized()
-    {
-        this.initialized = true;
-        for (const listener of this.onVisualsInitializedListeners)
-        {
-            listener();
-        }
     }
 }

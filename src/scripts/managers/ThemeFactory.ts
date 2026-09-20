@@ -1,5 +1,4 @@
 import { BufferGeometry, Color, Material, MeshStandardMaterial, Object3D, Texture } from "three";
-import type { IThreadmillTile, IVisuals } from "../../interfaces";
 import { BulletVisuals } from "../visuals/BulletVisuals";
 import { PixelFlowThreadmillVisuals } from "../visuals/pixelFlow/PixelFlowThreadmillVisuals";
 import { PixelFlowReserveVisuals } from "../visuals/pixelFlow/PixelFlowReserveVisuals";
@@ -11,6 +10,8 @@ import { FishFortuneReserveVisuals } from "../visuals/fishFortune/FishFortuneRes
 import { PenguinTurretVisuals } from "../visuals/fishFortune/PenguinTurretVisuals";
 import { PixelFlowThreadmillTileVisuals } from "../visuals/pixelFlow/PixelFlowThreadmillTileVisuals";
 import { FishFortuneWaterCurl } from "../visuals/fishFortune/FishFortuneWaterCurl";
+import type { Visuals } from "../abstractClasses/Visuals";
+import type { ThreadmillTileVisuals } from "../abstractClasses/ThreadmillTile";
 
 export enum GameThemes {
     PixelFlow,
@@ -30,18 +31,18 @@ export class ThemeFactory
         this.currentTheme = theme;
     }
 
-    public getBulletVisuals(autoInitialize: boolean): IVisuals
+    public getBulletVisuals(autoInitialize: boolean): Visuals
     {
         //Bullets won't be different per theme, so we can simply construct their visuals
-        let visuals: IVisuals = new BulletVisuals();
+        let visuals: Visuals = new BulletVisuals();
         if(autoInitialize)
             visuals.initialize();
         return visuals;
     }
-    public getTapVisuals(autoInitialize: boolean): IVisuals
+    public getTapVisuals(autoInitialize: boolean): Visuals
     {
         //Taps won't be different per theme, so we can simply construct their visuals
-        let visuals: IVisuals = new TapVisuals();
+        let visuals: Visuals = new TapVisuals();
         if(autoInitialize)
             visuals.initialize();
         return visuals;
@@ -59,9 +60,9 @@ export class ThemeFactory
         }
     }
 
-    public getThreadmillVisuals(autoInitialize: boolean): IVisuals
+    public getThreadmillVisuals(autoInitialize: boolean): Visuals
     {
-        let visuals: IVisuals;
+        let visuals: Visuals;
         switch(this.currentTheme)
         {
             case GameThemes.FishOfFortune:
@@ -77,9 +78,9 @@ export class ThemeFactory
         return visuals;
     }
 
-    public getThreadmillTileVisuals(autoInitialize: boolean): IThreadmillTile
+    public getThreadmillTileVisuals(autoInitialize: boolean): ThreadmillTileVisuals
     {
-        let visuals: IThreadmillTile;
+        let visuals: ThreadmillTileVisuals;
         switch(this.currentTheme)
         {
             case GameThemes.FishOfFortune:
@@ -95,9 +96,9 @@ export class ThemeFactory
         return visuals;
     }
     
-    public getReserveVisuals(autoInitialize: boolean): IVisuals
+    public getReserveVisuals(autoInitialize: boolean): Visuals
     {
-        let visuals: IVisuals;
+        let visuals: Visuals;
         switch(this.currentTheme)
         {
             case GameThemes.FishOfFortune:
@@ -113,9 +114,9 @@ export class ThemeFactory
         return visuals;
     }
 
-    public getTurretVisuals(autoInitialize: boolean): IVisuals
+    public getTurretVisuals(autoInitialize: boolean): Visuals
     {
-        let visuals: IVisuals;
+        let visuals: Visuals;
         switch(this.currentTheme)
         {
             case GameThemes.FishOfFortune:

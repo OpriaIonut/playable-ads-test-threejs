@@ -1,14 +1,15 @@
 import { BufferGeometry, CatmullRomCurve3, Euler, Line, LineBasicMaterial, Vector3 } from "three";
 import { game, themeFactory } from "../../main";
-import type { IThreadmillTile, IVisuals } from "../../interfaces";
+import type { Visuals } from "../abstractClasses/Visuals";
+import type { ThreadmillTileVisuals } from "../abstractClasses/ThreadmillTile";
 
 export class Threadmill
 {
-    private visuals: IVisuals;
+    private visuals: Visuals;
     private debugPath: boolean = false;
 
     private threadmillTileSpawnPoint: Vector3 = new Vector3(-1.25, 0.1, 0.35);
-    private threadmillTiles: IThreadmillTile[] = [];
+    private threadmillTiles: ThreadmillTileVisuals[] = [];
     
     private reserveRotation: Euler = new Euler(0.0, 0.0, -Math.PI * 0.5);
     private rightVector = new Vector3(-1, 0, 0);
@@ -98,7 +99,7 @@ export class Threadmill
         this.visuals.dispose();
     }
 
-    public getThreadmillTile(): IThreadmillTile | undefined
+    public getThreadmillTile(): ThreadmillTileVisuals | undefined
     {
         if(this.threadmillTiles.length <= 0)
             return undefined;
@@ -110,7 +111,7 @@ export class Threadmill
         return tile;
     }
 
-    public returnTile(tile: IThreadmillTile)
+    public returnTile(tile: ThreadmillTileVisuals)
     {
         this.threadmillTiles.push(tile);
         this.positionThreadmillTiles(false);

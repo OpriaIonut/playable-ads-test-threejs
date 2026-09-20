@@ -6,7 +6,7 @@ import { Threadmill } from './scripts/entities/Threadmill'
 import { TurretManager } from './scripts/managers/TurretManager'
 import { GameThemes, ThemeFactory } from './scripts/managers/ThemeFactory'
 import { OutputPass } from 'three/examples/jsm/Addons.js'
-import { BlackOutlinePass } from './scripts/postprocessing/BlackOutlinePass'
+import { BlackOutlinePass } from './scripts/shaders/BlackOutlinePass'
 
 //--------------------GAME CREATION
 const canvas = document.querySelector<HTMLCanvasElement>('#mainCanvas')!;
