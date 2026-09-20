@@ -1,6 +1,6 @@
 import { Color, Mesh, MeshStandardMaterial, Object3D } from "three";
 import type { ITurretVisuals } from "../../../interfaces";
-import { game, themeFactory } from "../../../main";
+import { game, outlinedObjects, themeFactory } from "../../../main";
 
 export class PenguinTurretVisuals implements ITurretVisuals
 {
@@ -20,7 +20,7 @@ export class PenguinTurretVisuals implements ITurretVisuals
                         : child.material.clone();
                 }
             });
-            // game.enableShadows(obj);
+            outlinedObjects.push(obj);
 
             obj.scale.setScalar(2.75);
             this.gfx.add(obj);

@@ -136,7 +136,7 @@ export class ThemeFactory
         switch(this.currentTheme)
         {
             case GameThemes.FishOfFortune:
-                return WaterMaterial.create(new Color('#0097c1'), new Color('#22cbde'), new Color('#0079b2'))
+                return WaterMaterial.create(new Color('#0097c1'), new Color('#22cbde'), new Color('#0079b2'), new Color("#76fcfe"));
             case GameThemes.PixelFlow:
             default:
                 return new MeshStandardMaterial({ color: '#4b4d6a' });
