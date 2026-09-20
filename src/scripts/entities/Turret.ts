@@ -1,4 +1,4 @@
-import { Color, Material, Mesh, MeshStandardMaterial, Vector3, type Object3D } from "three";
+import { Color, Euler, Material, Mesh, MeshStandardMaterial, Vector3, type Object3D } from "three";
 import type { IUpdatable } from "../../interfaces";
 import { RoundedBoxGeometry } from "three/examples/jsm/Addons.js";
 import { game } from "../../main";
@@ -27,9 +27,14 @@ export class Turret implements IUpdatable
     private onThreadmillEndReached?: (turret: Turret) => void
     private onTurretDestroyed?: (turret: Turret) => void
 
-    private moveDir = new Vector3();
     private lastShootTarget: Tile | undefined;  //We will only shoot bullets when the target changes and the new target is valid
     private canShoot: boolean = false;          //Will be set to true when we reach the first point on the threadmill (to not shoot while flying towards the threadmill)
+    private rotationOffset: Euler = new Euler(); //On threadmill, will rotate towards movement direction, but after shooting once, we want to rotate it towards the tiles. This offset is used for that
+    private shootOffset: Vector3 = new Vector3(0.0, 0.0, 0.2); //Controls how far away the bullets should spawn from the turret (in local space)
+
+    //Auxiliary variables to help with calculations
+    private moveDir = new Vector3();
+    private aux = new Vector3();
 
     private bulletCounter: HTMLDivElement;      //ui element to notify the user how many bullets he still has
 
@@ -107,6 +112,7 @@ export class Turret implements IUpdatable
         this.threadmillIndex = 0;
         this.isOnThreadmill = true;
         this.canShoot = false;
+        this.rotationOffset.set(0.0, 0.0, 0.0);
         this.threadmillPoints = positions;
         this.setLocationProperties(-1, -1, -1);
         this.onThreadmillEndReached = onEndReached;
@@ -119,6 +125,8 @@ export class Turret implements IUpdatable
     {
         this.isOnThreadmill = false;
         this.canShoot = false;
+        this.obj.rotation.set(0, 0, 0);
+        this.rotationOffset.set(0.0, 0.0, 0.0);
         if(this.onThreadmillEndReached != undefined)
             this.onThreadmillEndReached(this);
     }
@@ -172,6 +180,12 @@ export class Turret implements IUpdatable
         //Calculate movement direction and move towards it
         this.moveDir.copy(target).sub(this.obj.position).normalize();
         this.moveDir.multiplyScalar(this.movementSpeed * game.deltaTime);
+
+        if(this.canShoot)
+        {
+            this.aux.copy(this.moveDir).applyEuler(this.rotationOffset).add(this.obj.position);
+            this.obj.lookAt(this.aux);
+        }
         this.obj.position.add(this.moveDir);
 
         //Update counter position to follow the turret
@@ -215,9 +229,9 @@ export class Turret implements IUpdatable
      */
     private updateCounter()
     {
-        this.moveDir.copy(this.obj.position).project(game.cameraObject);
-        this.bulletCounter.style.left = `${(this.moveDir.x + 1) / 2 * window.innerWidth}px`;
-        this.bulletCounter.style.top = `${-(this.moveDir.y - 1) / 2 * window.innerHeight}px`;
+        this.aux.copy(this.obj.position).project(game.cameraObject);
+        this.bulletCounter.style.left = `${(this.aux.x + 1) / 2 * window.innerWidth}px`;
+        this.bulletCounter.style.top = `${-(this.aux.y - 1) / 2 * window.innerHeight}px`;
         this.bulletCounter.innerHTML = "" + this.bulletsRemaining;
     }
 
@@ -226,10 +240,13 @@ export class Turret implements IUpdatable
      */
     private spawnBullet(target: Tile)
     {
+        this.rotationOffset.set(0.0, Math.PI * 0.5, 0.0);
         this.tileManager.markTileAsShot(target); //Mark the tile as shot to not allow other turrets to also shoot it (would make the game impossible to win)
+        this.obj.lookAt(target.mesh.position);
 
         //Create the bullet and give it a callback for what should happen when it reaches the destination (in this case, destroy the bullet and the tile)
-        const bullet = new Bullet(this.obj.position, target.mesh.position, () => {
+        this.aux.copy(this.shootOffset).applyEuler(this.obj.rotation).add(this.obj.position);
+        const bullet = new Bullet(this.aux, target.mesh.position, () => {
             bullet.destroy();
             this.tileManager.destroyTile(target);
         });

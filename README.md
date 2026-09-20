@@ -13,6 +13,11 @@ npm run dev
 
 ## Versions
 
+### v2 - gameplay polish
+
+* Increased the bullet speed from 1 to 2.5
+* Made turrets look towards movement direction on the threadmill, and after they shoot a tile, they rotate towards the grid center
+
 ### v1 - primitive playable
 
 * Contains the fully playable game with all features required for it, but with primitive graphics.

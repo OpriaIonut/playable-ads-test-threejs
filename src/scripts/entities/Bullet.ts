@@ -6,7 +6,7 @@ export class Bullet implements IUpdatable
 {
     private obj: Mesh;
 
-    private moveSpeed = 1.0;
+    private moveSpeed = 2.5;
     private endPos: Vector3;
     private onTargetReached?: () => void;
 
