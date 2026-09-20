@@ -4,6 +4,7 @@ import { Game } from './scripts/managers/Game'
 import { TileManager } from './scripts/managers/TileManager'
 import { Threadmill } from './scripts/entities/Threadmill'
 import { TurretManager } from './scripts/managers/TurretManager'
+import { GameThemes, ThemeFactory } from './scripts/managers/ThemeFactory'
 
 //--------------------GAME CREATION
 const canvas = document.querySelector<HTMLCanvasElement>('#mainCanvas')!;
@@ -12,6 +13,9 @@ export const game = new Game(canvas); //Responsible for all rendering-related lo
 game.setCameraPos(new Vector3(0, 5, 2));
 game.cameraLookAt(new Vector3(0, 0, 0));
 
+//If you want to change all of the visuals of the game, change this property
+const selectedTheme: GameThemes = GameThemes.Primitive;
+export const themeFactory = new ThemeFactory(selectedTheme);
 
 //--------------------ENVIRONMENT
 const hemisphereLight = new HemisphereLight('#fff4d6', '#213247', 2.5);

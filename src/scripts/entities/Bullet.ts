@@ -1,10 +1,10 @@
-import { Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from "three";
-import type { IUpdatable } from "../../interfaces";
-import { game } from "../../main";
+import { Vector3 } from "three";
+import type { IUpdatable, Visuals } from "../../interfaces";
+import { game, themeFactory } from "../../main";
 
 export class Bullet implements IUpdatable
 {
-    private obj: Mesh;
+    private visuals: Visuals;
 
     private moveSpeed = 2.5;
     private endPos: Vector3;
@@ -22,10 +22,8 @@ export class Bullet implements IUpdatable
         this.onTargetReached = onTargetReached;
 
         //Create and intialize the 3D object
-        this.obj = new Mesh(new SphereGeometry(), new MeshBasicMaterial());
-        this.obj.position.copy(startPos);
-        this.obj.scale.setScalar(0.05);
-        game.addObject(this.obj);
+        this.visuals = themeFactory.getBulletVisuals(true);
+        this.visuals.gfx.position.copy(startPos);
         game.addUpdatable(this);
     }
 
@@ -40,12 +38,15 @@ export class Bullet implements IUpdatable
             return;
 
         //If we didn't reach the target location, calculate in which direction we should move and move towards it
-        this.moveDir.copy(this.endPos).sub(this.obj.position).normalize();
+        this.moveDir.copy(this.endPos).sub(this.visuals.gfx.position).normalize();
         this.moveDir.multiplyScalar(this.moveSpeed * game.deltaTime);
-        this.obj.position.add(this.moveDir);
+        this.visuals.gfx.position.add(this.moveDir);
+
+        this.moveDir.add(this.visuals.gfx.position);
+        this.visuals.gfx.lookAt(this.moveDir);
 
         //Check if we are close enough to the target and call the callback if one was provided
-        if(this.endPos.distanceToSquared(this.obj.position) < 0.01)
+        if(this.endPos.distanceToSquared(this.visuals.gfx.position) < 0.01)
         {
             this.reachedEnd = true;
             if(this.onTargetReached != undefined)
@@ -53,16 +54,12 @@ export class Bullet implements IUpdatable
         }
     }
 
-
     /**
      * Uninitialize the object and dispose of all it's resources
      */
     public destroy()
     {
         game.removeUpdatable(this);
-        game.removeObject(this.obj);
-        this.obj.geometry.dispose();
-        (this.obj.material as MeshBasicMaterial).dispose();
-        this.obj.dispose();
+        this.visuals.dispose();
     }
 }
