@@ -1,5 +1,5 @@
 import { Box3, Color, Material, Mesh, MeshStandardMaterial, Texture, Vector2, Vector3 } from 'three'
-import { game } from '../../main'
+import { game, outlinedObjects } from '../../main'
 import { RoundedBoxGeometry } from 'three/examples/jsm/Addons.js'
 
 /**
@@ -38,7 +38,7 @@ export class TileManager
      * @param padding Small empty area that we should let between each tile
      * @param tileHeight How tall the tiles should be
      */
-    public constructor(imgPath: string, bounds: Box3, padding = 0.01, tileHeight: number = 0.5)
+    public constructor(imgPath: string, bounds: Box3, padding = 0.0, tileHeight: number = 0.25)
     {
         this.bounds = bounds.clone();
         this.padding = Math.max(0, padding);
@@ -198,11 +198,12 @@ export class TileManager
 
                 const cube = new Mesh(
                     this.cubeGeometry,
-                    new MeshStandardMaterial({ color }),
+                    new MeshStandardMaterial({ color, roughness: 0.3 }),
                 );
                 cube.scale.set(cubeSize.x, this.tileHeight, cubeSize.y);
-                cube.position.set(xStart + pixelX * step.x, y, zStart - (height - 1 - pixelY) * step.y);
+                cube.position.set(xStart + pixelX * step.x, y + this.tileHeight * 0.5, zStart - (height - 1 - pixelY) * step.y);
                 game.addObject(cube);
+                outlinedObjects.push(cube);
 
                 //Store some meta-data for the tile and add it to the grid
                 let tile: Tile = {

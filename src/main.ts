@@ -20,7 +20,7 @@ const selectedTheme: GameThemes = GameThemes.PixelFlow;
 export const themeFactory = new ThemeFactory(selectedTheme);
 
 //--------------------ENVIRONMENT
-const hemisphereLight = new HemisphereLight('#fff4d6', '#213247', 2.5);
+const hemisphereLight = new HemisphereLight('#8f9cc2', '#213247', 1.5);
 game.addObject(hemisphereLight);
 
 const directionalLight = new DirectionalLight('#ffffff', 3);
