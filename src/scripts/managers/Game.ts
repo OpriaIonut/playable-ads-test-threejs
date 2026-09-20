@@ -1,12 +1,15 @@
-import { Color, Object3D, PerspectiveCamera, WebGLRenderer, Scene, Vector3, TextureLoader } from 'three'
+import { Color, Object3D, PerspectiveCamera, WebGLRenderer, Scene, Vector3, TextureLoader, SRGBColorSpace } from 'three'
 import type { IUpdatable } from '../../interfaces'
 import { ModelLoader } from './ModelLoader';
+import { EffectComposer, Pass, RenderPass } from 'three/examples/jsm/Addons.js';
 
 export class Game
 {
     private scene: Scene;               //Root of our rendering structure. All objects which will be rendered will be added to this
     private renderer: WebGLRenderer;    //Main renderer used to draw our scene
     private camera: PerspectiveCamera;  //Camera used to draw our scene
+
+    private effectComposer: EffectComposer;
 
     private gameStarted = false;                        //Set to true when the game loop starts
     private updatables = new Set<IUpdatable>();         //List of all scripts that we need to call every frame in the game loop
@@ -35,6 +38,11 @@ export class Game
         
         this.renderer = new WebGLRenderer({ canvas, antialias: true });
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.outputColorSpace = SRGBColorSpace;
+
+        this.effectComposer = new EffectComposer(this.renderer);
+        const renderPass = new RenderPass(this.scene, this.camera);
+        this.effectComposer.addPass(renderPass);
 
         this.texLoader = new TextureLoader();
         this.objLoader = new ModelLoader();
@@ -86,6 +94,7 @@ export class Game
     }
 
     //Getters for different properties that other scripts would need
+    public get sceneRoot(): Scene                   { return this.scene; }
     public get currentTime(): number                { return this.currentTimeValue.value; }
     public get currentTimeUniform()                 { return this.currentTimeValue; }
     public get deltaTime(): number                  { return this.deltaTimeValue; }
@@ -102,6 +111,15 @@ export class Game
     public cameraLookAt(pos: Vector3)
     {
         this.camera.lookAt(pos);
+    }
+
+    public addRenderPass(pass: Pass)
+    {
+        this.effectComposer.addPass(pass);
+    }
+    public removePass(pass: Pass)
+    {
+        this.effectComposer.removePass(pass);
     }
 
     /**
@@ -154,7 +172,8 @@ export class Game
             updatable.update();
         }
 
-        this.renderer.render(this.scene, this.camera);
+        // this.renderer.render(this.scene, this.camera);
+        this.effectComposer.render(this.deltaTimeValue);
         this.animationFrameId = requestAnimationFrame(this.update);
     }
 
@@ -166,6 +185,7 @@ export class Game
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight, false);
+        this.effectComposer.setSize(window.innerWidth, window.innerHeight);
 
         for (const listener of this.resizeListeners)
         {

@@ -1,6 +1,6 @@
 import { Material, Mesh, Object3D, Texture } from "three";
 import type { IVisuals } from "../../interfaces";
-import { game, themeFactory } from "../../main";
+import { game, outlinedObjects, themeFactory } from "../../main";
 import { MovingThreadmillMaterial } from "../shaders/MovingThreadmillMaterial";
 
 export class ThreadmillVisuals implements IVisuals
@@ -42,6 +42,7 @@ export class ThreadmillVisuals implements IVisuals
             obj.scale.setScalar(0.9);
             obj.position.set(-1.75, 0, 0.35);
             this.gfx.add(obj);
+            outlinedObjects.push(obj);
 
             this.meshesLoaded++;
             if(this.meshesLoaded >= 2)

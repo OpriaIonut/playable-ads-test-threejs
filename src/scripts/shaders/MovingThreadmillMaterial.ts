@@ -40,6 +40,9 @@ void main()
 {
     vec2 uv = vec2(fract(v_uv.x * u_arrowCount - u_time * u_speed), v_uv.y);
     vec3 colorOut = texture(u_arrowTex, uv).rgb;
+
+    colorOut = pow(colorOut, vec3(2.2));
+
     gl_FragColor = vec4(colorOut, 1.0);
 }
 `;

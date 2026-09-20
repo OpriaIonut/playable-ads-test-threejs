@@ -1,10 +1,12 @@
 import './style.css'
-import { Box3, DirectionalLight, HemisphereLight, Mesh, MeshStandardMaterial, PlaneGeometry, Vector3 } from 'three'
+import { Box3, DirectionalLight, HemisphereLight, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, Vector2, Vector3 } from 'three'
 import { Game } from './scripts/managers/Game'
 import { TileManager } from './scripts/managers/TileManager'
 import { Threadmill } from './scripts/entities/Threadmill'
 import { TurretManager } from './scripts/managers/TurretManager'
 import { GameThemes, ThemeFactory } from './scripts/managers/ThemeFactory'
+import { OutputPass } from 'three/examples/jsm/Addons.js'
+import { BlackOutlinePass } from './scripts/postprocessing/BlackOutlinePass'
 
 //--------------------GAME CREATION
 const canvas = document.querySelector<HTMLCanvasElement>('#mainCanvas')!;
@@ -32,6 +34,24 @@ const groundPlane = new Mesh(
 groundPlane.rotation.set(-Math.PI * 0.5, 0.0, 0.0);
 groundPlane.scale.set(20, 20, 1);
 game.addObject(groundPlane);
+
+
+// Set up post-processing
+export const outlinedObjects: Object3D[] = [];
+
+const outlinePass = new BlackOutlinePass(
+  game.sceneRoot,
+  game.cameraObject,
+  new Vector2(window.innerWidth, window.innerHeight),
+  outlinedObjects,
+);
+outlinePass.outlineColor.set(0x000000);
+outlinePass.outlineStrength = 1;
+outlinePass.outlineSize = 1.5;
+game.addRenderPass(outlinePass);
+
+const outputPass = new OutputPass();
+game.addRenderPass(outputPass);
 
 
 //--------------------LOGIC
