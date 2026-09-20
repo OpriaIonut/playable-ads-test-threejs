@@ -14,7 +14,7 @@ export class BulletVisuals implements Visuals
         this.gfx.add(bullet);
 
         let trailMaterial = FadingGradientMaterial.create(new Color('#ffffff'), 0.0, 0.8);
-        let trail = new Mesh(new CylinderGeometry(1, 0.35, 5, 12, 1), trailMaterial);
+        let trail = new Mesh(new CylinderGeometry(1, 0.35, 5, 12, 1, true), trailMaterial);
         trail.scale.setScalar(0.05);
         trail.position.set(0.0, 0.0, -0.15);
         trail.rotation.set(Math.PI * 0.5, 0.0, 0.0);

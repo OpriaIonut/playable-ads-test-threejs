@@ -1,10 +1,10 @@
 import { BufferGeometry, Material, Object3D, Texture } from "three";
 import type { Visuals } from "../../interfaces";
 import { BulletVisuals } from "../visuals/BulletVisuals";
+import { ThreadmillVisuals } from "../visuals/ThreadmillVisuals";
 
 export enum GameThemes {
-    Primitive,
-    Pigs,
+    PixelFlow,
     FishOfFortune
 }
 
@@ -25,6 +25,26 @@ export class ThemeFactory
     {
         //Bullets won't be different per theme, so we can simply construct their visuals
         let visuals: Visuals = new BulletVisuals();
+        if(autoInitialize)
+            visuals.initialize();
+        return visuals;
+    }
+
+    public getThreadmillVisuals(autoInitialize: boolean): Visuals
+    {
+        let visuals: Visuals;
+        switch(this.currentTheme)
+        {
+            case GameThemes.FishOfFortune:
+                visuals = new ThreadmillVisuals();
+                break;
+            case GameThemes.PixelFlow:
+                visuals = new ThreadmillVisuals();
+                break;
+            default:
+                visuals = new ThreadmillVisuals();
+                break;
+        }
         if(autoInitialize)
             visuals.initialize();
         return visuals;

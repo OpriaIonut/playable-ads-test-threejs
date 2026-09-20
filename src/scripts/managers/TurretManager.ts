@@ -45,7 +45,7 @@ export class TurretManager
     private aux: Vector3 = new Vector3();
 
     //UI element to tell the user how many turrets can be on the threadmill
-    private threadmillCounterWorldPos: Vector3 = new Vector3(-1.25, 0, 0.5);
+    private threadmillCounterWorldPos: Vector3 = new Vector3(-1.5, 0, 0.75);
     private threadmillCounter: HTMLDivElement;
 
     private hasGameEnded: boolean = false;

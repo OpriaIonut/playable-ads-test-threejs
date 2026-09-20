@@ -14,7 +14,7 @@ game.setCameraPos(new Vector3(0, 5, 2));
 game.cameraLookAt(new Vector3(0, 0, 0));
 
 //If you want to change all of the visuals of the game, change this property
-const selectedTheme: GameThemes = GameThemes.Primitive;
+const selectedTheme: GameThemes = GameThemes.PixelFlow;
 export const themeFactory = new ThemeFactory(selectedTheme);
 
 //--------------------ENVIRONMENT
@@ -39,7 +39,7 @@ game.addObject(groundPlane);
 const threadmill = new Threadmill();
 
 //Initializez & manages the tiles that we need to destroy to win the game. Is initialized through a small texture in which each pixel is equivalent to a tile (transparent pixels are skipped)
-const tileManager = new TileManager("tiles.png", new Box3(new Vector3(-1, 0, -2), new Vector3(1, 0, 0)));
+const tileManager = new TileManager("textures/tiles.png", new Box3(new Vector3(-1, 0, -2.25), new Vector3(1, 0, -0.25)));
 
 //Main class which holds all of the turret relevant logic (spawn turrets, turret reserve, make them move on the threadmill, game over condition, etc.)
 const turretManager = new TurretManager(tileManager, threadmill);
