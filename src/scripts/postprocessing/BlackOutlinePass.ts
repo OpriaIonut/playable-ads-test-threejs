@@ -1,17 +1,4 @@
-import {
-    Color,
-    LinearFilter,
-    MeshBasicMaterial,
-    Object3D,
-    RGBAFormat,
-    Scene,
-    ShaderMaterial,
-    Texture,
-    Vector2,
-    WebGLRenderTarget,
-    WebGLRenderer,
-    Camera,
-} from 'three'
+import { Color, LinearFilter, MeshBasicMaterial, Object3D, RGBAFormat, Scene, ShaderMaterial, Texture, Vector2, WebGLRenderTarget, WebGLRenderer, Camera } from 'three'
 import { Pass, FullScreenQuad } from 'three/examples/jsm/Addons.js'
 
 const outlineShader = {

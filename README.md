@@ -13,6 +13,13 @@ npm run dev
 
 ## Versions
 
+### v3 - visual polish
+
+* Changed project architecture to easily switch between different game themes
+* Added bullet trail, special font, tap VFX, 3D meshes for threadmill, pigs & reserve
+* Added shadows
+* Finetuned visuals to be closer to the video reference
+
 ### v2 - gameplay polish
 
 * Increased the bullet speed from 1 to 2.5

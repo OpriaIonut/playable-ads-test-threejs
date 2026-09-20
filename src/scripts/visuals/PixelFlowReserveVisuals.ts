@@ -15,6 +15,7 @@ export class PixelFlowReserveVisuals implements IVisuals
             const obj = data.model.clone(true);
             obj.scale.setScalar(0.65);
             this.gfx.add(obj);
+            game.enableShadows(obj);
             this.onInitialized();
         });
         game.addObject(this.gfx);

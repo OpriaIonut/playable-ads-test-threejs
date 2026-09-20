@@ -20,6 +20,7 @@ export class PigTurretVisuals implements ITurretVisuals
                         : child.material.clone();
                 }
             });
+            game.enableShadows(obj);
 
             obj.scale.setScalar(2.75);
             this.gfx.add(obj);

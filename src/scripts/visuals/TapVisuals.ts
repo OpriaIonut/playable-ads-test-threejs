@@ -16,15 +16,15 @@ export class TapVisuals implements IVisuals, IUpdatable
     }
     public update(): void
     {
-        this.gfx.scale.setScalar(this.gfx.scale.x + 15.0 * game.deltaTime);
+        this.gfx.scale.setScalar(this.gfx.scale.x + 12.5 * game.deltaTime);
     }
 
     public initialize(): void
     {
         this.mat = new MeshStandardMaterial({ depthWrite: false, depthTest: false, color: "#ffffff" });
-        const obj = new Mesh(new RingGeometry(0.75), this.mat);
+        const obj = new Mesh(new RingGeometry(0.8), this.mat);
         obj.rotation.set(-Math.PI * 0.5, 0.0, 0.0);
-        obj.scale.setScalar(0.1);
+        obj.scale.setScalar(0.05);
         this.gfx.add(obj);
 
         game.addObject(this.gfx);

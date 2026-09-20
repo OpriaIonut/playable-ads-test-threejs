@@ -38,7 +38,7 @@ export class TileManager
      * @param padding Small empty area that we should let between each tile
      * @param tileHeight How tall the tiles should be
      */
-    public constructor(imgPath: string, bounds: Box3, padding = 0.0, tileHeight: number = 0.25)
+    public constructor(imgPath: string, bounds: Box3, padding = 0.0, tileHeight: number = 0.2)
     {
         this.bounds = bounds.clone();
         this.padding = Math.max(0, padding);

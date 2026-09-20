@@ -241,7 +241,7 @@ export class TurretManager
         this.raycaster.setFromCamera(this.pointer, game.cameraObject);
 
         let tapVFX = themeFactory.getTapVisuals(true);
-        this.raycaster.ray.at(10, tapVFX.gfx.position);
+        this.raycaster.ray.at(5, tapVFX.gfx.position);
         setTimeout(() => {
             tapVFX.dispose();
         }, 250);

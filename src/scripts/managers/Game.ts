@@ -1,4 +1,4 @@
-import { Color, Object3D, PerspectiveCamera, WebGLRenderer, Scene, Vector3, TextureLoader, SRGBColorSpace } from 'three'
+import { Color, Mesh, Object3D, PerspectiveCamera, WebGLRenderer, Scene, Vector3, TextureLoader, SRGBColorSpace, PCFShadowMap } from 'three'
 import type { IUpdatable } from '../../interfaces'
 import { ModelLoader } from './ModelLoader';
 import { EffectComposer, Pass, RenderPass } from 'three/examples/jsm/Addons.js';
@@ -39,6 +39,8 @@ export class Game
         this.renderer = new WebGLRenderer({ canvas, antialias: true });
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.outputColorSpace = SRGBColorSpace;
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = PCFShadowMap;
 
         this.effectComposer = new EffectComposer(this.renderer);
         const renderPass = new RenderPass(this.scene, this.camera);
@@ -75,6 +77,7 @@ export class Game
      */
     public addObject(obj: Object3D)
     {
+        this.enableShadows(obj);
         this.scene.add(obj);
     }
     public removeObject(obj: Object3D)
@@ -120,6 +123,18 @@ export class Game
     public removePass(pass: Pass)
     {
         this.effectComposer.removePass(pass);
+    }
+    
+    public enableShadows(obj: Object3D): void
+    {
+        obj.traverse((child) =>
+        {
+            if (child instanceof Mesh)
+            {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
     }
 
     /**
