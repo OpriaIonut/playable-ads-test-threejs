@@ -1,0 +1,94 @@
+AI Conversation Log
+===================
+
+1. User prompt:
+In the current folder can you create a Typescript project with Three.js included using vite? I also want an html file for the web page and when I run `npm run dev` to automatically open it in my default browser on port 8080
+
+Response summary:
+Created a Vite TypeScript project, installed Three.js, added an HTML entry page and a starter Three.js scene, configured port 8080 and automatic browser opening, and verified the build.
+
+
+2. User prompt:
+Create a Game.ts class which handles all of the rendering-related logic. It should initialize the renderer, contain the update loop, handle window resizing events and contain a Scene object which is the root of my rendering hierarchy.
+
+Additionally, take the Updatable interface that I created and make it possible to add & remove Updatable objects to the game class (it should call the update function for every Updatable added in the game loop, and the start method when starting the game or when the object is added if the game is already started)
+
+Response summary:
+Added the Game lifecycle class, moved rendering and animation logic into it, exposed the scene, implemented Updatable registration/removal and start behavior, and updated the entry point.
+
+
+3. User prompt:
+My canvas is not fullscreen, it has padding on the top & left and also stretches beyond my screen. Make it fullscreen and add deltatime calculations to the game class (expose current time and delta time through getters)
+
+Response summary:
+Fixed the canvas selector and fullscreen layout, removed the extra canvas, and added seconds-based current-time and delta-time tracking.
+
+
+4. User prompt:
+In the TileManager script that I created, extract the pixels from the loaded texture and place cubes in the specified bounds. The size of the cubes should be calculated based on how many pixels there are in the image and also allow for small padding between them. The image is a png, and pixels with opacity less than 0.1 should not place any cubes. Also extract a map of <Color, number> which specifies how many cubes are of which color
+
+Response summary:
+Implemented PNG pixel extraction, transparent-pixel filtering, padded cube generation within Box3 bounds, and a color count map.
+
+
+5. User prompt:
+In TurretManager.ts, detect when I click on a turret in the first row. Turrets are stored in availableTurrets, it is a 2D array with the following format [column][row]. I want to detect clicks on row 0.
+
+Response summary:
+Added descendant-aware turret raycasting and validation limited to row-zero turrets, with camera and canvas access exposed through Game.
+
+
+6. User prompt:
+Inside of tile manager I added an empty function 'getClosestTile'. Can you complete the function so that it returns the closest available tile from the spawnedTiles list relative to the position passed through the parameter? I don't want to go over all tiles while searching, use math to figure out from which side of the 2D array you should start searching, and pick only tiles which are not undefined.
+
+Response summary:
+Implemented mathematically seeded nearest-tile lookup with an expanding search strategy that skipped undefined tiles.
+
+
+7. User prompt:
+Can you replace the radius check in the getClosestTile function with a simple row/column check? Basically, from the given position, check if the X or Z coordinate is inside the grid and pick the tile on the outer edges of the grid which shares the same coordinate (also take into account an epsilon of 0.01)
+
+Response summary:
+Replaced ring traversal with epsilon-aware edge row/column lookup and searches along the relevant row or column.
+
+
+8. User prompt:
+The script detects the outer edge in the grid, but after that one gets destroyed (set to undefined), it doesn't detect the new outer edge (the first edge with Mesh type rather than undefined)
+
+Response summary:
+Corrected the search direction so it starts at the actual edge and walks inward, skipping destroyed tiles.
+
+
+9. User prompt:
+Extend the game class to allow me to subscribe and unsubscribe to resize events
+
+Response summary:
+Added a resize listener Set, public add/remove listener methods, post-resize notifications, and listener cleanup during disposal.
+
+
+10. User prompt:
+Can you complete the destroy function in ThemeFactory so that it traverses the entire object and destroys all data relevant to the object (geometry, materials, textures, etc.), depending on the boolean parameters?
+
+Response summary:
+Implemented recursive disposal of geometries, materials, nested textures, and shared resources while honoring the boolean flags.
+
+
+11. User prompt:
+Three.js's OutlinePass treats black as transparent. Write me a custom shaderpass that I can add to my effect composer which creates outlines for objects added to the list outlinedObjects and also support black outline
+
+Response summary:
+Added BlackOutlinePass with a separate object mask, edge-detection shader, configurable outline color and strength, live outlined-object list support, resize handling, and disposal.
+
+
+12. User prompt:
+I don't see any outline. I checked your code and tMask is fully white. There may be an issue in it's rendering
+
+Response summary:
+Isolated mask rendering by removing the scene background temporarily, clearing to transparent black, and sampling the mask red channel instead of alpha.
+
+
+13. User prompt:
+Can you add shadows to my game? I want all objects in the game to be able to cast shadows
+
+Response summary:
+Enabled soft shadow mapping, recursively marked meshes as casters and receivers including late-loaded objects, and configured the directional light and shadow camera.

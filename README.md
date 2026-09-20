@@ -11,7 +11,23 @@ npm install
 npm run dev
 ```
 
+## General Notes
+
+* To switch between the 2 skins, go into [main.ts](./src/main.ts) and change the `selectedTheme` variable. The entire game will adapt just by changing this one variable.
+* You can also change the layout of the tiles. In [main.ts](./src/main.ts), if you change the texture passed to `tileManager`, all of the tiles and the turrets will adapt. The texture works in the following way:
+    * Each pixel in the texture is considered a tile. Depending on how many pixels there are on the width & height, the tiles in the game will also stretch
+    * An algorithm will extract the colors from the texture and spawn as many turrets are needed for each color
+    * Transparent pixels with alpha values less than 0.1 will be skipped (this way we can make interesting tile layouts, draw fishes, 8 bit characters, etc.)
+* Thanks to the architecture of the project it is very easy to create new skins for this game. We just have to create the assets for them, then in the [visuals](./src/scripts/visuals) folder create the visual implementation for them (basically a script that loads them and initializes them however needed: set special shaders, scale & position them, etc.). Afterwards add new entries in the [ThemeFactory](./src/scripts/managers/ThemeFactory.ts) for the new skin.
+
 ## Versions
+
+### v4 - fish of fortune reskin
+
+* Added objects which the turrets sit on when they are moving on the threadmill
+* Added new meshes & shaders suited to the fish of fortune theme
+* Made it easy to switch between the 2 game skins (in main.ts you just have to switch the `selectedTheme` and the entire game will adapt by itself)
+* Cleaned up architecture by implementing abstract classes instead of interfaces (reduced a lot of duplicate code in the Visuals classes)
 
 ### v3 - visual polish
 
